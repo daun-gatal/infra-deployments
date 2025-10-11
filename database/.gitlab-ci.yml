@@ -18,6 +18,11 @@ before_script:
   - sleep 5  # Wait for tailscaled to start
   - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname=${TAILSCALE_HOSTNAME}
   - echo "✅ Connected to Tailscale as ${TAILSCALE_HOSTNAME}"
+  - mkdir -p ~/.ssh
+  - echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+  - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+  - ssh -T git@gitlab.com || true
+  - echo "✅ SSH configured for GitLab access"
 
 # ==========================================================
 # Terraform PLAN for Database Module
