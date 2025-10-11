@@ -23,7 +23,7 @@ database_plan:
     - apt-get update && apt-get install -y curl openssh-client
     # --- Tailscale Ephemeral Auth ---
     - curl -fsSL https://tailscale.com/install.sh | sh
-    - systemctl start tailscaled
+    - nohup tailscaled & 
     - sleep 5  # Wait for the service to start
     - tailscale up --auth-key=${TAILSCALE_AUTH_KEY}
     - echo "✅ Logged into Tailscale Ephemeral Mode"
