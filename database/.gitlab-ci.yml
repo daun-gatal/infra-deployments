@@ -1,36 +1,41 @@
 stages:
   - plan
+  - apply
 
 variables:
   MODULE_DIR: "database"
   REMOTE_DIR: "/opt/terraform-deploy"
   OUTPUT_DIR: "/opt/terraform-outputs"
+  TAILSCALE_HOSTNAME: "ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
 
-# =====================================
+# ==========================================================
+# Global setup for Tailscale - runs before every job
+# ==========================================================
+before_script:
+  - apt-get update && apt-get install -y curl openssh-client
+  - curl -fsSL https://tailscale.com/install.sh | sh
+  - nohup tailscaled & 
+  - sleep 5  # Wait for tailscaled to start
+  - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname=${TAILSCALE_HOSTNAME}
+  - echo "✅ Connected to Tailscale as ${TAILSCALE_HOSTNAME}"
+
+after_script:
+  - echo "🔻 Logging out from Tailscale..."
+  - tailscale logout || true
+
+# ==========================================================
 # Terraform PLAN for Database Module
-# =====================================
+# ==========================================================
 database_plan:
   stage: plan
   image: ubuntu:22.04
   rules:
     - changes:
         - "database/**"
-    # Run only after merge (push to main)
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       when: always
     - when: never
   script:
-    - apt-get update && apt-get install -y curl openssh-client
-    # --- Tailscale Ephemeral Auth ---
-    - curl -fsSL https://tailscale.com/install.sh | sh
-    - nohup tailscaled & 
-    - sleep 5  # Wait for the service to start
-    - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname="ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
-    - echo "✅ Logged into Tailscale Ephemeral Mode"
-
-    # --- Copy Terraform module to remote server ---
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "rm -rf ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${REMOTE_DIR}/${MODULE_DIR}"
     - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
-
-    # --- Logout from Tailscale ---
-    - tailscale logout
+    - echo "✅ Module ${MODULE_DIR} copied to remote server"
