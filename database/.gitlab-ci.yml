@@ -19,10 +19,6 @@ before_script:
   - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname=${TAILSCALE_HOSTNAME}
   - echo "✅ Connected to Tailscale as ${TAILSCALE_HOSTNAME}"
 
-after_script:
-  - echo "🔻 Logging out from Tailscale..."
-  - tailscale logout || true
-
 # ==========================================================
 # Terraform PLAN for Database Module
 # ==========================================================
@@ -39,3 +35,4 @@ database_plan:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "rm -rf ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${REMOTE_DIR}/${MODULE_DIR}"
     - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
     - echo "✅ Module ${MODULE_DIR} copied to remote server"
+    - tailscale logout
