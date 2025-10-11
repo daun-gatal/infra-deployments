@@ -11,7 +11,7 @@ variables:
 # =====================================
 database_plan:
   stage: plan
-  image: tailscale/tailscale:latest
+  image: ubuntu:22.04
   rules:
     - changes:
         - "database/**"
@@ -22,6 +22,9 @@ database_plan:
   script:
     - apt-get update && apt-get install -y curl openssh-client
     # --- Tailscale Ephemeral Auth ---
+    - curl -fsSL https://tailscale.com/install.sh | sh
+    - systemctl start tailscaled
+    - sleep 5  # Wait for the service to start
     - tailscale up --auth-key=${TAILSCALE_AUTH_KEY}
     - echo "✅ Logged into Tailscale Ephemeral Mode"
 
