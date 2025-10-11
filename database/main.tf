@@ -23,7 +23,7 @@ provider "helm" {
 
 
 module "postgres_db" {
-  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/postgres?ref=update-airflow"
+  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/postgres?ref=main"
 
   db_name      = "default"
   db_user      = "admin"

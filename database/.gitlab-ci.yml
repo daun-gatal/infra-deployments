@@ -32,7 +32,13 @@ database_plan:
       when: always
     - when: never
   script:
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "rm -rf ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${REMOTE_DIR}/${MODULE_DIR}"
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${OUTPUT_DIR}/${MODULE_DIR}"
     - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
     - echo "✅ Module ${MODULE_DIR} copied to remote server"
-    - tailscale logout
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+        cd ${REMOTE_DIR}/${MODULE_DIR} &&
+        terraform init -input=false &&
+        terraform plan -out=${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan
+      "
+    - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
+    - tailscale logout # Logout to avoid leaking auth key on remote server
