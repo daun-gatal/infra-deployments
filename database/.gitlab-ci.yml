@@ -11,7 +11,7 @@ variables:
 # =====================================
 database_plan:
   stage: plan
-  image: alpine:latest
+  image: ubuntu:22.04
   rules:
     - changes:
         - "database/**"
@@ -20,7 +20,7 @@ database_plan:
       when: always
     - when: never
   script:
-    - apk add --no-cache curl unzip openssh git
+    - apt-get update && apt-get install -y curl openssh-client
     # --- Tailscale Ephemeral Auth ---
     - curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key=${TAILSCALE_AUTH_KEY}
     - echo "✅ Logged into Tailscale Ephemeral Mode"
