@@ -11,7 +11,7 @@ variables:
 # =====================================
 database_plan:
   stage: plan
-  image: ubuntu:22.04
+  image: tailscale/tailscale:latest
   rules:
     - changes:
         - "database/**"
@@ -22,7 +22,7 @@ database_plan:
   script:
     - apt-get update && apt-get install -y curl openssh-client
     # --- Tailscale Ephemeral Auth ---
-    - curl -fsSL https://tailscale.com/install.sh | sh && tailscale up --auth-key=${TAILSCALE_AUTH_KEY}
+    - tailscale up --auth-key=${TAILSCALE_AUTH_KEY}
     - echo "✅ Logged into Tailscale Ephemeral Mode"
 
     # --- Copy Terraform module to remote server ---
