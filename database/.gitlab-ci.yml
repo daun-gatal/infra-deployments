@@ -1,0 +1,30 @@
+stages:
+  - plan
+
+variables:
+  MODULE_DIR: "database"
+  REMOTE_DIR: "/opt/terraform-deploy"
+  OUTPUT_DIR: "/opt/terraform-outputs"
+
+# =====================================
+# Terraform PLAN for Database Module
+# =====================================
+database_plan:
+  stage: plan
+  image: alpine:latest
+  rules:
+    - changes:
+        - "database/**"
+    # Run only after merge (push to main)
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      when: always
+    - when: never
+  script:
+    - apk add --no-cache curl unzip openssh git
+    # --- Tailscale Ephemeral Auth ---
+    - curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key=${TAILSCALE_AUTH_KEY}
+    - echo "✅ Logged into Tailscale Ephemeral Mode"
+
+    # --- Copy Terraform module to remote server ---
+    - ssh root@${TAILSCALE_SERVER} "rm -rf ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${REMOTE_DIR}/${MODULE_DIR}"
+    - scp -o -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
