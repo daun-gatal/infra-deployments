@@ -22,7 +22,7 @@ database_plan:
   script:
     - apt-get update && apt-get install -y curl openssh-client
     # --- Tailscale Ephemeral Auth ---
-    - curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key=${TAILSCALE_AUTH_KEY}
+    - curl -fsSL https://tailscale.com/install.sh | sh && tailscale up --auth-key=${TAILSCALE_AUTH_KEY}
     - echo "✅ Logged into Tailscale Ephemeral Mode"
 
     # --- Copy Terraform module to remote server ---
