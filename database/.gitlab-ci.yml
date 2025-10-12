@@ -38,7 +38,7 @@ database_plan:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
         terraform init --upgrade &&
-        terraform plan -out=${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan
+        terraform plan -out=${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan -var="db_password=${DB_PASSWORD}"
       "
     - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
     - tailscale logout # Logout to avoid leaking auth key on remote server
