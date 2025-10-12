@@ -39,8 +39,9 @@ database_plan:
         terraform init \
           -backend-config="address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}" \
           -backend-config="lock_address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}/lock" \
-          -backend-config="unlock_address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}/lock" 
-          -backend-config="/opt/terraform-backend/backend.hcl" -upgrade &&
+          -backend-config="unlock_address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}/lock" \
+          -backend-config="/opt/terraform-backend/backend.hcl" \
+          -upgrade &&
         terraform plan -var="db_password=${DB_PASSWORD}"
       "
     - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
