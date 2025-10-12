@@ -26,8 +26,7 @@ database_plan:
   stage: plan
   image: ubuntu:22.04
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-      changes:
+    - changes:
         - "database/**"
       when: always
     - when: never
@@ -38,7 +37,7 @@ database_plan:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
         terraform init -upgrade &&
-        terraform plan -var="db_password=${DB_PASSWORD}"
+        terraform plan -out=${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan -var="db_password=${DB_PASSWORD}"
       "
     - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
     - tailscale logout # Logout to avoid leaking auth key on remote server
@@ -58,10 +57,11 @@ database_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
-        terraform apply -auto-approve -var="db_password=${DB_PASSWORD}" -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate &&
+        terraform apply -auto-approve -var="db_password=${DB_PASSWORD}" -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan &&
         terraform output -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
       "
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         rm -rf ${REMOTE_DIR}/${MODULE_DIR}
       "
     - tailscale logout # Logout to avoid leaking auth key on remote server
+    
