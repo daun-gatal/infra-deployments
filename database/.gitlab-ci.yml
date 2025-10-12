@@ -38,10 +38,9 @@ database_plan:
     - |
       ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} <<'EOF'
       set -e
-      cd ${REMOTE_DIR}/${MODULE_DIR}
 
       echo "🚀 Initializing Terraform backend..."
-      terraform init \
+      cd ${REMOTE_DIR}/${MODULE_DIR} && terraform init \
         -backend-config="address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}" \
         -backend-config="lock_address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}/lock" \
         -backend-config="unlock_address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}/lock" \
@@ -52,7 +51,6 @@ database_plan:
       terraform plan -var="db_password=${DB_PASSWORD}"
       EOF
 
-    - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
     - tailscale logout # Logout to avoid leaking auth key on remote server
 
 # ==========================================================
