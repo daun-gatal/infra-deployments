@@ -29,6 +29,6 @@ module "postgres_db" {
   db_user      = "admin"
   db_password  = var.db_password
   storage_size = "5Gi"
-  # extra_db_names = ["airflow", "metabase", "nessie", "gravitino"]
-  # enable_resource_allocation = true
+  extra_db_names = ["airflow", "metabase", "nessie", "gravitino"]
+  enable_resource_allocation = true
 }
