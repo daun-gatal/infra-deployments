@@ -26,9 +26,9 @@ database_plan:
   stage: plan
   image: ubuntu:22.04
   rules:
-    - changes:
-        - "database/**"
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      changes:
+        - "database/**"
       when: always
     - when: never
   script:
@@ -65,4 +65,3 @@ database_apply:
         rm -rf ${REMOTE_DIR}/${MODULE_DIR}
       "
     - tailscale logout # Logout to avoid leaking auth key on remote server
-    
