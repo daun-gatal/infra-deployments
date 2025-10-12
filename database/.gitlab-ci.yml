@@ -37,7 +37,7 @@ database_plan:
     - echo "✅ Module ${MODULE_DIR} copied to remote server"
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
-        terraform init -upgrade -reconfigure &&
+        terraform init -upgrade -migrate-state &&
         terraform plan -out=${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan -var="db_password=${DB_PASSWORD}"
       "
     - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
