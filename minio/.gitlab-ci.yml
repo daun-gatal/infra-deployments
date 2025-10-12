@@ -36,7 +36,11 @@ minio_plan:
     - echo "✅ Module ${MODULE_DIR} copied to remote server"
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
-        terraform init -upgrade &&
+        terraform init \
+          -backend-config="address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}" \
+          -backend-config="lock_address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}/lock" \
+          -backend-config="unlock_address=https://gitlab.com/api/v4/projects/75236107/terraform/state/${MODULE_DIR}/lock" 
+          -backend-config="/opt/terraform-backend/backend.hcl" -upgrade &&
         terraform plan -var="minio_root_password=${MINIO_PASSWORD}"
       "
     - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
