@@ -60,8 +60,5 @@ database_apply:
         terraform apply -auto-approve -var="db_password=${DB_PASSWORD}"  &&
         terraform output -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
       "
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
-        rm -rf ${REMOTE_DIR}/${MODULE_DIR}
-      "
     - tailscale logout # Logout to avoid leaking auth key on remote server
     
