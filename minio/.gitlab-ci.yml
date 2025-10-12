@@ -1,0 +1,64 @@
+stages:
+  - plan
+  - apply
+
+variables:
+  MODULE_DIR: "minio"
+  REMOTE_DIR: "/opt/terraform-deploy"
+  OUTPUT_DIR: "/opt/terraform-outputs"
+  TAILSCALE_HOSTNAME: "ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
+
+# ==========================================================
+# Global setup for Tailscale - runs before every job
+# ==========================================================
+before_script:
+  - apt-get update && apt-get install -y curl openssh-client
+  - curl -fsSL https://tailscale.com/install.sh | sh
+  - nohup tailscaled & 
+  - sleep 5  # Wait for tailscaled to start
+  - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname=${TAILSCALE_HOSTNAME}
+  - echo "✅ Connected to Tailscale as ${TAILSCALE_HOSTNAME}"
+
+# ==========================================================
+# Terraform PLAN for Minio Module
+# ==========================================================
+minio_plan:
+  stage: plan
+  image: ubuntu:22.04
+  rules:
+    - changes:
+        - "minio/**"
+      when: always
+    - when: never
+  script:
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${OUTPUT_DIR}/${MODULE_DIR}"
+    - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
+    - echo "✅ Module ${MODULE_DIR} copied to remote server"
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+        cd ${REMOTE_DIR}/${MODULE_DIR} &&
+        terraform init -upgrade &&
+        terraform plan -var="minio_root_password=${MINIO_PASSWORD}"
+      "
+    - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
+    - tailscale logout # Logout to avoid leaking auth key on remote server
+
+# ==========================================================
+# Terraform APPLY for minio Module
+# ==========================================================
+minio_apply:
+  stage: apply
+  image: ubuntu:22.04
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - "minio/**"
+      when: always
+    - when: never
+  script:
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+        cd ${REMOTE_DIR}/${MODULE_DIR} &&
+        terraform apply -auto-approve -var="minio_root_password=${MINIO_PASSWORD}"  &&
+        terraform output -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
+      "
+    - tailscale logout # Logout to avoid leaking auth key on remote server
+    
