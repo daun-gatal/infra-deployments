@@ -36,8 +36,9 @@ database_plan:
     - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
     - echo "✅ Module ${MODULE_DIR} copied to remote server"
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+        rm -rf ${REMOTE_DIR}/${MODULE_DIR}/.terraform ${REMOTE_DIR}/${MODULE_DIR}/.terraform.lock.hcl
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
-        terraform init -upgrade -migrate-state &&
+        terraform init -upgrade &&
         terraform plan -out=${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan -var="db_password=${DB_PASSWORD}"
       "
     - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
