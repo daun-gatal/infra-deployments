@@ -27,9 +27,6 @@ module "minio" {
   minio_root_password = var.minio_root_password
   tailscale_expose    = true
   storage_size       = "50Gi"
-  enable_resource_allocation = true
-  cpu_allocation = "2"
-  memory_allocation = "4Gi"
 
   buckets = [
     {
