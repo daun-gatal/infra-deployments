@@ -50,15 +50,15 @@ database_apply:
   stage: apply
   image: ubuntu:22.04
   rules:
-    - changes:
-        - "database/**"
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - "database/**"
       when: always
     - when: never
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
-        terraform apply ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan -auto-approve -var="db_password=${DB_PASSWORD}" -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate &&
+        terraform apply -auto-approve -var="db_password=${DB_PASSWORD}" -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan &&
         terraform output -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
       "
     - tailscale logout # Logout to avoid leaking auth key on remote server
