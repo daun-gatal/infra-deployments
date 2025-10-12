@@ -29,6 +29,23 @@ module "postgres_db" {
   db_user      = "admin"
   db_password  = var.db_password
   storage_size = "5Gi"
-  # extra_db_names = ["airflow", "metabase", "nessie", "gravitino"]
-  # enable_resource_allocation = true
+  extra_db_names = ["airflow", "metabase", "nessie", "gravitino"]
+  enable_resource_allocation = true
+}
+
+output "postgres_rw_dns" {
+  description = "Name of the Postgres service"
+  value       = module.postgres_db.postgres_rw_dns
+}
+
+output "postgres_password" {
+  description = "Password for the Postgres"
+  value       = module.postgres_db.postgres_password
+  sensitive   = true
+}
+
+output "postgres_username" {
+  description = "Username for the Postgres"
+  value       = module.postgres_db.postgres_username
+  sensitive   = true
 }
