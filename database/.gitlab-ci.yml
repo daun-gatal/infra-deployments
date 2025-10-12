@@ -37,7 +37,7 @@ database_plan:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
         terraform init -upgrade &&
-        terraform plan -out=${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan -var="db_password=${DB_PASSWORD}"
+        terraform plan -var="db_password=${DB_PASSWORD}"
       "
     - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
     - tailscale logout # Logout to avoid leaking auth key on remote server
@@ -57,8 +57,8 @@ database_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
-        terraform apply -auto-approve -var="db_password=${DB_PASSWORD}" -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan &&
-        terraform output -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
+        terraform apply -auto-approve -var="db_password=${DB_PASSWORD}"  &&
+        terraform output -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
       "
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         rm -rf ${REMOTE_DIR}/${MODULE_DIR}
