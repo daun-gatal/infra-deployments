@@ -1,2 +1,3 @@
 include:
   - local: 'database/.gitlab-ci.yml'
+  - local: 'minio/.gitlab-ci.yml'
