@@ -36,7 +36,6 @@ database_plan:
     - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
     - echo "✅ Module ${MODULE_DIR} copied to remote server"
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
-        rm -rf ${REMOTE_DIR}/${MODULE_DIR}/.terraform ${REMOTE_DIR}/${MODULE_DIR}/.terraform.lock.hcl &&
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
         terraform init -upgrade &&
         terraform plan -out=${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan -var="db_password=${DB_PASSWORD}"
@@ -61,6 +60,9 @@ database_apply:
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
         terraform apply -auto-approve -var="db_password=${DB_PASSWORD}" -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan &&
         terraform output -state=${OUTPUT_DIR}/${MODULE_DIR}/terraform.tfstate -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
+      "
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+        rm -rf ${REMOTE_DIR}/${MODULE_DIR}
       "
     - tailscale logout # Logout to avoid leaking auth key on remote server
     
