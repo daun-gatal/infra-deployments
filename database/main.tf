@@ -49,3 +49,5 @@ output "postgres_username" {
   value       = module.postgres_db.postgres_username
   sensitive   = true
 }
+
+# Optional: If you want to use a read replica, uncomment the following lines
