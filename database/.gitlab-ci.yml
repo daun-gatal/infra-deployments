@@ -7,8 +7,6 @@ variables:
   REMOTE_DIR: "/opt/terraform-deploy"
   OUTPUT_DIR: "/opt/terraform-outputs"
   TAILSCALE_HOSTNAME: "ci-runner-database-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
-  TF_USERNAME: "${GITLAB_USERNAME}"
-  TF_PASSWORD: "${CI_JOB_TOKEN}"
 
 # ==========================================================
 # Global setup for Tailscale - runs before every job
@@ -41,8 +39,8 @@ database_plan:
       lock_method     = "POST"
       unlock_method   = "DELETE"
       retry_wait_min  = 5
-      username        = "${TF_USERNAME}"
-      password        = "${CI_JOB_TOKEN}"
+      username        = "${GITLAB_USERNAME}"
+      password        = "${GITLAB_TOKEN}"
       EOF
       echo "✅ Created backend.hcl for module: ${MODULE_DIR}"
 
