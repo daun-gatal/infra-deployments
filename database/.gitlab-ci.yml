@@ -7,7 +7,8 @@ database_plan:
   variables:
     MODULE_DIR: "database"
   rules:
-    - changes:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      changes:
         - "database/main.tf"
       when: always
     - when: never
