@@ -63,4 +63,4 @@ output "minio_root_password" {
   sensitive   = true
 }
 
-# add comments v2
+# add comments v3

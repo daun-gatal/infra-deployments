@@ -2,18 +2,15 @@ stages:
   - plan
   - apply
 
-variables:
-  REMOTE_DIR: "/opt/terraform-deploy"
-  OUTPUT_DIR: "/opt/terraform-outputs"
-
 include:
   - local: 'database/.gitlab-ci.yml'
   - local: 'minio/.gitlab-ci.yml'
 
 before_script:
+  - source .env
   - apt-get update && apt-get install -y curl openssh-client
   - curl -fsSL https://tailscale.com/install.sh | sh
   - nohup tailscaled &
   - sleep 5
-  - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname="ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
+  - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname=${TAILSCALE_HOSTNAME}
   - echo "✅ Connected to Tailscale"
