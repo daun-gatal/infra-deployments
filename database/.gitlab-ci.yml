@@ -7,6 +7,8 @@ variables:
   REMOTE_DIR: "/opt/terraform-deploy"
   OUTPUT_DIR: "/opt/terraform-outputs"
   TAILSCALE_HOSTNAME: "ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
+  TF_USERNAME: "${GITLAB_USERNAME}"
+  TF_PASSWORD: "${CI_JOB_TOKEN}"
 
 # ==========================================================
 # Global setup for Tailscale - runs before every job
@@ -31,15 +33,31 @@ database_plan:
       when: always
     - when: never
   script:
+    - |
+      cat > ${MODULE_DIR}/backend.hcl <<EOF
+      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_DIR}"
+      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_DIR}/lock"
+      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_DIR}/lock"
+      lock_method     = "POST"
+      unlock_method   = "DELETE"
+      retry_wait_min  = 5
+      username        = "${CI_JOB_TOKEN}"
+      password        = "${CI_JOB_TOKEN}"
+      EOF
+      echo "✅ Created backend.hcl for module: ${MODULE_DIR}"
+
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${OUTPUT_DIR}/${MODULE_DIR}"
+
     - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
     - echo "✅ Module ${MODULE_DIR} copied to remote server"
+
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
-        terraform init -upgrade &&
+        terraform init -upgrade  -backend-config=backend.hcl &&
         terraform plan -var="db_password=${DB_PASSWORD}"
       "
     - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
+
     - tailscale logout # Logout to avoid leaking auth key on remote server
 
 # ==========================================================
