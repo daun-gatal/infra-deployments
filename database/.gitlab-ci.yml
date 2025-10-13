@@ -1,33 +1,14 @@
-stages:
-  - plan
-  - apply
-
-variables:
-  MODULE_DIR: "database"
-  REMOTE_DIR: "/opt/terraform-deploy"
-  OUTPUT_DIR: "/opt/terraform-outputs"
-  TAILSCALE_HOSTNAME: "ci-runner-database-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
-
-# ==========================================================
-# Global setup for Tailscale - runs before every job
-# ==========================================================
-before_script:
-  - apt-get update && apt-get install -y curl openssh-client
-  - curl -fsSL https://tailscale.com/install.sh | sh
-  - nohup tailscaled & 
-  - sleep 5  # Wait for tailscaled to start
-  - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname=${TAILSCALE_HOSTNAME}
-  - echo "✅ Connected to Tailscale as ${TAILSCALE_HOSTNAME}"
-
 # ==========================================================
 # Terraform PLAN for Database Module
 # ==========================================================
 database_plan:
   stage: plan
   image: ubuntu:22.04
+  variables:
+    MODULE_DIR: "database"
   rules:
     - changes:
-        - "database/**"
+        - "database/main.tf"
       when: always
     - when: never
   script:
@@ -50,10 +31,9 @@ database_plan:
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_DIR} &&
-        terraform init -upgrade  -backend-config=backend.hcl -migrate-state &&
+        terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
         terraform plan -var="db_password=${DB_PASSWORD}"
       "
-    - echo "✅ Terraform plan saved to ${OUTPUT_DIR}/${MODULE_DIR}/plan.tfplan"
 
     - tailscale logout # Logout to avoid leaking auth key on remote server
 
@@ -63,10 +43,12 @@ database_plan:
 database_apply:
   stage: apply
   image: ubuntu:22.04
+  variables:
+    MODULE_DIR: "database"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
-        - "database/**"
+        - "database/main.tf"
       when: always
     - when: never
   script:
@@ -75,5 +57,6 @@ database_apply:
         terraform apply -auto-approve -var="db_password=${DB_PASSWORD}"  &&
         terraform output -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
       "
+      
     - tailscale logout # Logout to avoid leaking auth key on remote server
     
