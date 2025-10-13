@@ -46,9 +46,7 @@ database_plan:
       EOF
       echo "✅ Created backend.hcl for module: ${MODULE_DIR}"
 
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${OUTPUT_DIR}/${MODULE_DIR}"
-
-    - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
+    - rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./${MODULE_DIR}/ root@${TAILSCALE_SERVER}:${REMOTE_DIR}/${MODULE_DIR}/
     - echo "✅ Module ${MODULE_DIR} copied to remote server"
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
