@@ -41,7 +41,7 @@ database_plan:
       lock_method     = "POST"
       unlock_method   = "DELETE"
       retry_wait_min  = 5
-      username        = "${CI_JOB_TOKEN}"
+      username        = "${TF_USERNAME}"
       password        = "${CI_JOB_TOKEN}"
       EOF
       echo "✅ Created backend.hcl for module: ${MODULE_DIR}"
