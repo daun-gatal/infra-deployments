@@ -33,6 +33,7 @@ module "kafka" {
   default_replication_factor = 2
   min_insync_replicas = 2
   storage_type = "persistent-claim"
+  storage_size = "20Gi"
 
   enable_kafka_ui = true
   kafka_ui_tailscale_expose = true
