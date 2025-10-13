@@ -4,8 +4,6 @@
 database_plan:
   stage: plan
   image: ubuntu:22.04
-  variables:
-    MODULE_DIR: "database"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       changes:
@@ -14,24 +12,24 @@ database_plan:
     - when: never
   script:
     - |
-      cat > ${MODULE_DIR}/backend.hcl <<EOF
-      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_DIR}"
-      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_DIR}/lock"
-      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_DIR}/lock"
+      cat > ${DATABASE_MODULE}/backend.hcl <<EOF
+      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${DATABASE_MODULE}"
+      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${DATABASE_MODULE}/lock"
+      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${DATABASE_MODULE}/lock"
       lock_method     = "POST"
       unlock_method   = "DELETE"
       retry_wait_min  = 5
       username        = "${GITLAB_USERNAME}"
       password        = "${GITLAB_TOKEN}"
       EOF
-      echo "✅ Created backend.hcl for module: ${MODULE_DIR}"
+      echo "✅ Created backend.hcl for module: ${DATABASE_MODULE}"
 
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_DIR} && mkdir -p ${OUTPUT_DIR}/${MODULE_DIR}"
-    - scp -o StrictHostKeyChecking=no -r ./${MODULE_DIR} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
-    - echo "✅ Module ${MODULE_DIR} copied to remote server"
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${DATABASE_MODULE} && mkdir -p ${OUTPUT_DIR}/${DATABASE_MODULE}"
+    - scp -o StrictHostKeyChecking=no -r ./${DATABASE_MODULE} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
+    - echo "✅ Module ${DATABASE_MODULE} copied to remote server"
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
-        cd ${REMOTE_DIR}/${MODULE_DIR} &&
+        cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
         terraform plan -var="db_password=${DB_PASSWORD}"
       "
@@ -44,8 +42,6 @@ database_plan:
 database_apply:
   stage: apply
   image: ubuntu:22.04
-  variables:
-    MODULE_DIR: "database"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
@@ -54,9 +50,9 @@ database_apply:
     - when: never
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
-        cd ${REMOTE_DIR}/${MODULE_DIR} &&
+        cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
         terraform apply -auto-approve -var="db_password=${DB_PASSWORD}"  &&
-        terraform output -json > ${OUTPUT_DIR}/${MODULE_DIR}/outputs.json
+        terraform output -json > ${OUTPUT_DIR}/${DATABASE_MODULE}/outputs.json
       "
       
     - tailscale logout # Logout to avoid leaking auth key on remote server
