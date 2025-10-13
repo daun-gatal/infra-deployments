@@ -1,4 +1,5 @@
 terraform {
+  backend "http" {}
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -49,3 +50,5 @@ output "postgres_username" {
   value       = module.postgres_db.postgres_username
   sensitive   = true
 }
+
+# add comments
