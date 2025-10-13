@@ -62,3 +62,5 @@ output "minio_root_password" {
   description = "The MinIO root password"
   sensitive   = true
 }
+
+# add comments v2
