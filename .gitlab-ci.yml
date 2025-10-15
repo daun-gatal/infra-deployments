@@ -16,4 +16,5 @@ before_script:
   - sleep 5
   - tailscale up --auth-key='${TAILSCALE_AUTH_KEY}?ephemeral=false&preauthorized=true' --advertise-tags=${TAILSCALE_TAG} --hostname=${TAILSCALE_HOSTNAME}
   - echo "✅ Connected to Tailscale"
-tailscale up --auth-key='${OAUTH_CLIENT_SECRET}?ephemeral=false&preauthorized=true' --advertise-tags=tag:ci
+
+# Add comments to the jobs below as needed
