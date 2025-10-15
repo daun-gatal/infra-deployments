@@ -6,6 +6,7 @@ include:
   - local: 'database/.gitlab-ci.yml'
   - local: 'minio/.gitlab-ci.yml'
   - local: 'kafka/.gitlab-ci.yml'
+  - local: 'spark/.gitlab-ci.yml'
 
 before_script:
   - source .env
