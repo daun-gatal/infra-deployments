@@ -22,13 +22,13 @@ provider "helm" {
   }
 }
 
-module "spark" {
-  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/spark?ref=main"
+# module "spark" {
+#   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/spark?ref=main"
 
-  tailscale_expose = true
-  cluster_worker_count = 2
-  worker_memory = "4Gi"
-  worker_cpu = "2"
-  spark_connect_executor_memory = "4Gi"
-  spark_connect_max_cores = 2
-}
+#   tailscale_expose = true
+#   cluster_worker_count = 2
+#   worker_memory = "4Gi"
+#   worker_cpu = "2"
+#   spark_connect_executor_memory = "4Gi"
+#   spark_connect_max_cores = 2
+# }
