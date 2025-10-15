@@ -24,6 +24,8 @@ provider "helm" {
 
 # module "spark" {
 #   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/spark?ref=main"
+# module "spark" {
+#   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/spark?ref=main"
 
 #   tailscale_expose = true
 #   cluster_worker_count = 2
