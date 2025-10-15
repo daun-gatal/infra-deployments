@@ -14,5 +14,6 @@ before_script:
   - curl -fsSL https://tailscale.com/install.sh | sh
   - nohup tailscaled &
   - sleep 5
-  - tailscale up --auth-key=${TAILSCALE_AUTH_KEY} --hostname=${TAILSCALE_HOSTNAME}
+  - tailscale up --auth-key='${TAILSCALE_AUTH_KEY}?ephemeral=false&preauthorized=true' --advertise-tags=${TAILSCALE_TAG} --hostname=${TAILSCALE_HOSTNAME}
   - echo "✅ Connected to Tailscale"
+tailscale up --auth-key='${OAUTH_CLIENT_SECRET}?ephemeral=false&preauthorized=true' --advertise-tags=tag:ci
