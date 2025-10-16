@@ -45,3 +45,5 @@ output "kafka_int_bootstrap_servers" {
   description = "Kafka bootstrap servers connection string for client applications"
   value       = module.kafka.kafka_int_bootstrap_servers
 }
+
+# add comments v4
