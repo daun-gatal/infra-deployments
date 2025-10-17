@@ -33,4 +33,14 @@ module "spark" {
   spark_connect_dynamic_allocation_shuffle_tracking_enabled = true
 }
 
+output "spark_connect_dns" {
+  description = "The DNS name for the Spark Connect service."
+  value       = module.spark.spark_connect_dns
+}
+
+output "spark_connect_port" {
+  description = "The port for the Spark Connect service."
+  value       = module.spark.spark_connect_port
+}
+
 # Add comments
