@@ -9,11 +9,6 @@ include:
   - local: 'spark/.gitlab-ci.yml'
   - local: 'nessie/.gitlab-ci.yml'
 
-default:
-  services:
-    - name: tailscale/tailscale:v1.88.4
-      alias: tailscale
-
 before_script:
   - source .env
   - export $(grep -v '^#' .env | cut -d= -f1)
