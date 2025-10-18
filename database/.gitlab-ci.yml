@@ -3,16 +3,13 @@
 # ==========================================================
 database_plan:
   stage: plan
-  image: ubuntu:24.04
+  image: ubuntu:22.04
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       changes:
         - "database/main.tf"
       when: always
     - when: never
-  services:
-    - name: tailscale/tailscale:v1.88.4
-      alias: tailscale
   script:
     - |
       cat > ${DATABASE_MODULE}/backend.hcl <<EOF

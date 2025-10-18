@@ -9,9 +9,17 @@ include:
   - local: 'spark/.gitlab-ci.yml'
   - local: 'nessie/.gitlab-ci.yml'
 
+services:
+  - name: tailscale/tailscale:v1.88.4
+    alias: tailscale
+
 before_script:
   - source .env
   - export $(grep -v '^#' .env | cut -d= -f1)
-  - apt-get update && apt-get install -y curl openssh-client gettext-base
+  - apk add --no-cache curl openssh gettext
+  - nohup tailscaled &
+  - sleep 5
+  - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --advertise-tags=${TAILSCALE_TAG} --hostname=${TAILSCALE_HOSTNAME}
+  - echo "✅ Connected to Tailscale"
 
 # Add comments to the jobs below as needed v1
