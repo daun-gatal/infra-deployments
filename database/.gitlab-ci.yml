@@ -26,12 +26,16 @@ database_plan:
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${DATABASE_MODULE} && mkdir -p ${OUTPUT_DIR}/${DATABASE_MODULE}"
     - scp -o StrictHostKeyChecking=no -r ./${DATABASE_MODULE} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
+    
+    - envsubst < .tf.env > .tfvars
+    - scp -o StrictHostKeyChecking=no .tfvars root@${TAILSCALE_SERVER}:/opt/.tfvars
+    
     - echo "✅ Module ${DATABASE_MODULE} copied to remote server"
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
-        terraform plan
+        terraform plan -var-file=/opt/.tfvars -compact-warnings
       "
 
     - tailscale logout # Logout to avoid leaking auth key on remote server
@@ -51,7 +55,7 @@ database_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
-        terraform apply -auto-approve &&
+        terraform apply -var-file=/opt/.tfvars -auto-approve &&
         terraform output -json > ${OUTPUT_DIR}/${DATABASE_MODULE}/outputs.json
       "
       
