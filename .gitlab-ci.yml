@@ -17,6 +17,6 @@ default:
 before_script:
   - source .env
   - export $(grep -v '^#' .env | cut -d= -f1)
-  - apk add --no-cache curl openssh gettext
+  - apt-get update && apt-get install -y curl openssh-client gettext-base
 
 # Add comments to the jobs below as needed v1
