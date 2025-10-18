@@ -55,7 +55,7 @@ kafka_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${KAFKA_MODULE} &&
-        terraform apply -var-file=/opt/.tfvars -auto-approve &&
+        terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings &&
         terraform output -json > ${OUTPUT_DIR}/${KAFKA_MODULE}/outputs.json
       "
   tags:

@@ -55,7 +55,7 @@ nessie_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${NESSIE_MODULE} &&
-        terraform apply -var-file=/opt/.tfvars -auto-approve &&
+        terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings &&
         terraform output -json > ${OUTPUT_DIR}/${NESSIE_MODULE}/outputs.json
       "
   tags:
