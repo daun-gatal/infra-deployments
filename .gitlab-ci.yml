@@ -9,9 +9,6 @@ include:
   - local: 'spark/.gitlab-ci.yml'
   - local: 'nessie/.gitlab-ci.yml'
 
-variables:
-  KUBERNETES_CONTAINER_SECURITY_CONTEXT_RUN_AS_USER: "0"
-
 before_script:
   - source .env
   - export $(grep -v '^#' .env | cut -d= -f1)
