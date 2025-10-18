@@ -7,10 +7,12 @@ include:
   - local: 'minio/.gitlab-ci.yml'
   - local: 'kafka/.gitlab-ci.yml'
   - local: 'spark/.gitlab-ci.yml'
+  - local: 'nessie/.gitlab-ci.yml'
 
 before_script:
   - source .env
-  - apt-get update && apt-get install -y curl openssh-client
+  - export $(grep -v '^#' .env | cut -d= -f1)
+  - apt-get update && apt-get install -y curl openssh-client gettext-base
   - curl -fsSL https://tailscale.com/install.sh | sh
   - nohup tailscaled &
   - sleep 5
