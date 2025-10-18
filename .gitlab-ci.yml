@@ -1,4 +1,5 @@
 stages:
+  - dummy
   - plan
   - apply
 
@@ -13,5 +14,24 @@ before_script:
   - source .env
   - export $(grep -v '^#' .env | cut -d= -f1)
   - apt-get update && apt-get install -y curl openssh-client gettext-base
+
+dummy_job:
+  stage: plan
+  image: alpine:latest
+  before_script: []
+  script:
+    - echo "Running dummy job because specific files did NOT change"
+  rules:
+    # Don't run if any files in subdirectories changed
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      changes:
+        - database/**/*
+        - minio/**/*
+        - kafka/**/*
+        - spark/**/*
+        - nessie/**/*
+      when: never
+    # Run in all other cases
+    - when: always
 
 # Add comments to the jobs below as needed v1
