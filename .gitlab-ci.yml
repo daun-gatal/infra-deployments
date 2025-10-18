@@ -16,7 +16,6 @@ before_script:
   - nohup tailscaled &
   - sleep 5
   - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --advertise-tags=${TAILSCALE_TAG} --hostname=${TAILSCALE_HOSTNAME}
-  - scp -o StrictHostKeyChecking=no -r .tf.env root@${TAILSCALE_SERVER}:opt/.tf.env
   - echo "✅ Connected to Tailscale"
 
 # Add comments to the jobs below as needed
