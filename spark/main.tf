@@ -51,7 +51,7 @@ module "spark" {
     "spark.sql.defaultCatalog" = "datalake"
     "spark.sql.catalog.datalake" = "org.apache.iceberg.spark.SparkCatalog"
     "spark.sql.extensions" = "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions"
-    "spark.sql.catalog.datalake.warehouse" = "s3://datalake/warehouse"
+    "spark.sql.catalog.datalake.warehouse" = "s3a://datalake/warehouse"
     "spark.sql.catalog.datalake.uri" = "jdbc:postgresql://${local.db.postgres_rw_dns.value}:5432/datalake"
     "spark.sql.catalog.datalake.jdbc.user" = local.db.postgres_username.value
     "spark.sql.catalog.datalake.jdbc.password" = local.db.postgres_password.value
