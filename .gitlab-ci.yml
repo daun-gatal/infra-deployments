@@ -23,6 +23,8 @@ dummy_job:
   before_script: []
   script:
     - echo "Running dummy job because specific files did NOT change"
+  rules:
+    - when: always
   tags:
     - k8s
 # Add comments to the jobs below as needed v1
