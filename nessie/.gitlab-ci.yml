@@ -36,7 +36,7 @@ nessie_plan:
         cd ${REMOTE_DIR}/${NESSIE_MODULE} &&
         export $(grep -v '^#' /opt/.tf.env | xargs) &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
-        terraform plan -var-file=/opt/.tfvars
+        terraform plan -var-file=/opt/.tfvars -compact-warnings
       "
 
     - tailscale logout # Logout to avoid leaking auth key on remote server

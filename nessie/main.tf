@@ -60,6 +60,7 @@ output "nessie_default_warehouse" {
 output "nessie_s3_endpoint" {
   value       = module.nessie.nessie_s3_endpoint
   description = "The S3 endpoint for Nessie"
+  sensitive = true
 }
 
 output "nessie_s3_region" {
