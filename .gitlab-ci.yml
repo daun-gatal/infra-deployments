@@ -11,8 +11,8 @@ include:
 
 before_script:
   - source .env
-  - scp -o StrictHostKeyChecking=no -r .tf.env root@${TAILSCALE_SERVER}:opt/.tf.env
   - apt-get update && apt-get install -y curl openssh-client
+  - scp -o StrictHostKeyChecking=no -r .tf.env root@${TAILSCALE_SERVER}:opt/.tf.env
   - curl -fsSL https://tailscale.com/install.sh | sh
   - nohup tailscaled &
   - sleep 5
