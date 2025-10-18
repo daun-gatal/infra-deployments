@@ -11,7 +11,7 @@ include:
 
 before_script:
   - source .env
-  - apt-get update && apt-get install -y curl openssh-client
+  - apt-get update && apt-get install -y curl openssh-client gettext-base
   - curl -fsSL https://tailscale.com/install.sh | sh
   - nohup tailscaled &
   - sleep 5
