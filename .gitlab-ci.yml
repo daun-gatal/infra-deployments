@@ -11,6 +11,7 @@ include:
 
 before_script:
   - source .env
+  - export $(grep -v '^#' .env | cut -d= -f1)
   - apt-get update && apt-get install -y curl openssh-client gettext-base
   - curl -fsSL https://tailscale.com/install.sh | sh
   - nohup tailscaled &
