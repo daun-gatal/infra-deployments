@@ -43,11 +43,12 @@ module "spark" {
     "spark.hadoop.fs.s3a.path.style.access" = "true"
     "spark.hadoop.fs.s3a.secret.key" = local.minio.minio_root_password.value
     "spark.jars.ivy" = "/tmp/.ivy2.5.2"
-    "spark.jars.packages" = "org.apache.hadoop:hadoop-aws:3.4.1,org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.0"
+    "spark.jars.packages" = "org.apache.hadoop:hadoop-aws:3.4.1,org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.0,org.postgresql:postgresql:42.7.3"
     "spark.kubernetes.driver.pod.excludedFeatureSteps" = "org.apache.spark.deploy.k8s.features.KerberosConfDriverFeatureStep"
     "spark.kubernetes.executor.podNamePrefix" = "spark-connect-server-iceberg"
     "spark.scheduler.mode" = "FAIR"
     "spark.sql.catalog.datalake.type" = "jdbc"
+    "spark.sql.catalog.datalake.catalog-impl" = "org.apache.iceberg.jdbc.JdbcCatalog"
     "spark.sql.defaultCatalog" = "datalake"
     "spark.sql.catalog.datalake" = "org.apache.iceberg.spark.SparkCatalog"
     "spark.sql.extensions" = "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions"
