@@ -55,7 +55,7 @@ database_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
-        terraform apply -var-file=/opt/.tfvars -auto-approve &&
+        terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings &&
         terraform output -json > ${OUTPUT_DIR}/${DATABASE_MODULE}/outputs.json
       "
   tags:

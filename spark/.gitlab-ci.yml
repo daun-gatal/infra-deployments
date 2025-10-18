@@ -51,7 +51,7 @@ spark_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${SPARK_MODULE} &&
-        terraform apply -auto-approve &&
+        terraform apply -auto-approve -compact-warnings &&
         terraform output -json > ${OUTPUT_DIR}/${SPARK_MODULE}/outputs.json
       "
   tags:
