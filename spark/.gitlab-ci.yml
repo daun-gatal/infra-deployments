@@ -35,6 +35,8 @@ spark_plan:
       "
 
     - tailscale logout # Logout to avoid leaking auth key on remote server
+  tags:
+    - k8s
 
 # ==========================================================
 # Terraform APPLY for Spark Module
@@ -56,4 +58,6 @@ spark_apply:
       "
       
     - tailscale logout # Logout to avoid leaking auth key on remote server
+  tags:
+    - k8s
     
