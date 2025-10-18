@@ -37,8 +37,8 @@ database_plan:
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
         terraform plan -var-file=/opt/.tfvars -compact-warnings
       "
-
-    - tailscale logout # Logout to avoid leaking auth key on remote server
+  tags:
+    - k8s
 
 # ==========================================================
 # Terraform APPLY for Database Module
@@ -58,6 +58,6 @@ database_apply:
         terraform apply -var-file=/opt/.tfvars -auto-approve &&
         terraform output -json > ${OUTPUT_DIR}/${DATABASE_MODULE}/outputs.json
       "
-      
-    - tailscale logout # Logout to avoid leaking auth key on remote server
+  tags:
+    - k8s
     

@@ -26,15 +26,19 @@ kafka_plan:
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${KAFKA_MODULE} && mkdir -p ${OUTPUT_DIR}/${KAFKA_MODULE}"
     - scp -o StrictHostKeyChecking=no -r ./${KAFKA_MODULE} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
+    
+    - envsubst < .tf.env > .tfvars
+    - scp -o StrictHostKeyChecking=no .tfvars root@${TAILSCALE_SERVER}:/opt/.tfvars
+    
     - echo "✅ Module ${KAFKA_MODULE} copied to remote server"
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${KAFKA_MODULE} &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
-        terraform plan -var="kafka_ui_auth_password=${KAFKA_UI_PASSWORD}"
+        terraform plan -var-file=/opt/.tfvars -compact-warnings
       "
-
-    - tailscale logout # Logout to avoid leaking auth key on remote server
+  tags:
+    - k8s
 
 # ==========================================================
 # Terraform APPLY for Kafka Module
@@ -51,9 +55,8 @@ kafka_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${KAFKA_MODULE} &&
-        terraform apply -auto-approve -var="kafka_ui_auth_password=${KAFKA_UI_PASSWORD}"  &&
+        terraform apply -var-file=/opt/.tfvars -auto-approve &&
         terraform output -json > ${OUTPUT_DIR}/${KAFKA_MODULE}/outputs.json
       "
-      
-    - tailscale logout # Logout to avoid leaking auth key on remote server
-    
+  tags:
+    - k8s
