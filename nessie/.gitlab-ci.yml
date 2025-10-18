@@ -1,35 +1,35 @@
 # ==========================================================
-# Terraform PLAN for Database Module
+# Terraform PLAN for Nessie Module
 # ==========================================================
-database_plan:
+nessie_plan:
   stage: plan
   image: ubuntu:22.04
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       changes:
-        - "database/main.tf"
+        - "nessie/main.tf"
       when: always
     - when: never
   script:
     - |
-      cat > ${DATABASE_MODULE}/backend.hcl <<EOF
-      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${DATABASE_MODULE}"
-      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${DATABASE_MODULE}/lock"
-      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${DATABASE_MODULE}/lock"
+      cat > ${NESSIE_MODULE}/backend.hcl <<EOF
+      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${NESSIE_MODULE}"
+      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${NESSIE_MODULE}/lock"
+      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${NESSIE_MODULE}/lock"
       lock_method     = "POST"
       unlock_method   = "DELETE"
       retry_wait_min  = 5
       username        = "${GITLAB_USERNAME}"
       password        = "${GITLAB_TOKEN}"
       EOF
-      echo "✅ Created backend.hcl for module: ${DATABASE_MODULE}"
+      echo "✅ Created backend.hcl for module: ${NESSIE_MODULE}"
 
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${DATABASE_MODULE} && mkdir -p ${OUTPUT_DIR}/${DATABASE_MODULE}"
-    - scp -o StrictHostKeyChecking=no -r ./${DATABASE_MODULE} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
-    - echo "✅ Module ${DATABASE_MODULE} copied to remote server"
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${NESSIE_MODULE} && mkdir -p ${OUTPUT_DIR}/${NESSIE_MODULE}"
+    - scp -o StrictHostKeyChecking=no -r ./${NESSIE_MODULE} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
+    - echo "✅ Module ${NESSIE_MODULE} copied to remote server"
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
-        cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
+        cd ${REMOTE_DIR}/${NESSIE_MODULE} &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
         terraform plan
       "
@@ -37,22 +37,22 @@ database_plan:
     - tailscale logout # Logout to avoid leaking auth key on remote server
 
 # ==========================================================
-# Terraform APPLY for Database Module
+# Terraform APPLY for Nessie Module
 # ==========================================================
-database_apply:
+nessie_apply:
   stage: apply
   image: ubuntu:22.04
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
-        - "database/main.tf"
+        - "nessie/main.tf"
       when: always
     - when: never
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
-        cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
+        cd ${REMOTE_DIR}/${NESSIE_MODULE} &&
         terraform apply -auto-approve &&
-        terraform output -json > ${OUTPUT_DIR}/${DATABASE_MODULE}/outputs.json
+        terraform output -json > ${OUTPUT_DIR}/${NESSIE_MODULE}/outputs.json
       "
       
     - tailscale logout # Logout to avoid leaking auth key on remote server
