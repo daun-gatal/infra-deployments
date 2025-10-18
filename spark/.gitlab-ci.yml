@@ -31,10 +31,10 @@ spark_plan:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${SPARK_MODULE} &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
-        terraform plan 
+        terraform plan -compact-warnings
       "
-
-    - tailscale logout # Logout to avoid leaking auth key on remote server
+  tags:
+    - k8s
 
 # ==========================================================
 # Terraform APPLY for Spark Module
@@ -54,6 +54,6 @@ spark_apply:
         terraform apply -auto-approve &&
         terraform output -json > ${OUTPUT_DIR}/${SPARK_MODULE}/outputs.json
       "
-      
-    - tailscale logout # Logout to avoid leaking auth key on remote server
+  tags:
+    - k8s
     
