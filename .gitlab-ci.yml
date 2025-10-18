@@ -19,4 +19,4 @@ before_script:
   - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --advertise-tags=${TAILSCALE_TAG} --hostname=${TAILSCALE_HOSTNAME}
   - echo "✅ Connected to Tailscale"
 
-# Add comments to the jobs below as needed
+# Add comments to the jobs below as needed v1
