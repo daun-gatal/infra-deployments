@@ -33,5 +33,6 @@ dummy_job:
       when: never
     # Run in all other cases
     - when: always
-
+  tags:
+    - k8s
 # Add comments to the jobs below as needed v1
