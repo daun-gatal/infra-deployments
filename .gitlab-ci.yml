@@ -10,6 +10,7 @@ include:
   - local: 'spark/.gitlab-ci.yml'
   - local: 'nessie/.gitlab-ci.yml'
   - local: 'trino/.gitlab-ci.yml'
+  - local: 'metabase/.gitlab-ci.yml'
 
 before_script:
   - source .env
@@ -23,17 +24,6 @@ dummy_job:
   script:
     - echo "Running dummy job because specific files did NOT change"
   rules:
-    # Don't run if any files in subdirectories changed
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-      changes:
-        - database/**/*
-        - minio/**/*
-        - kafka/**/*
-        - spark/**/*
-        - nessie/**/*
-        - trino/**/*
-      when: never
-    # Run in all other cases
     - when: always
   tags:
     - k8s
