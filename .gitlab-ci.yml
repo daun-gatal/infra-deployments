@@ -14,7 +14,7 @@ before_script:
   - export $(grep -v '^#' .env | cut -d= -f1)
   - apt-get update && apt-get install -y curl openssh-client gettext-base
   - curl -fsSL https://tailscale.com/install.sh | sh
-  - nohup tailscaled &
+  - nohup tailscaled --tun=userspace-networking &
   - sleep 5
   - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --advertise-tags=${TAILSCALE_TAG} --hostname=${TAILSCALE_HOSTNAME}
   - echo "✅ Connected to Tailscale"
