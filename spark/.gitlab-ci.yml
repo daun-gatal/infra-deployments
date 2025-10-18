@@ -31,7 +31,7 @@ spark_plan:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${SPARK_MODULE} &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
-        terraform plan -compact-warnings
+        terraform plan -var-file=/opt/.tfvars -compact-warnings
       "
   tags:
     - k8s
@@ -51,7 +51,7 @@ spark_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${SPARK_MODULE} &&
-        terraform apply -auto-approve -compact-warnings &&
+        terraform apply -auto-approve -var-file=/opt/.tfvars -compact-warnings &&
         terraform output -json > ${OUTPUT_DIR}/${SPARK_MODULE}/outputs.json
       "
   tags:
