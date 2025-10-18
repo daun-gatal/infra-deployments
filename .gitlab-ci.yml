@@ -9,6 +9,7 @@ include:
   - local: 'kafka/.gitlab-ci.yml'
   - local: 'spark/.gitlab-ci.yml'
   - local: 'nessie/.gitlab-ci.yml'
+  - local: 'trino/.gitlab-ci.yml'
 
 before_script:
   - source .env
@@ -30,6 +31,7 @@ dummy_job:
         - kafka/**/*
         - spark/**/*
         - nessie/**/*
+        - trino/**/*
       when: never
     # Run in all other cases
     - when: always
