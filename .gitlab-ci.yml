@@ -16,7 +16,7 @@ before_script:
   - apt-get update && apt-get install -y curl openssh-client gettext-base
 
 dummy_job:
-  stage: plan
+  stage: dummy
   image: alpine:latest
   before_script: []
   script:
