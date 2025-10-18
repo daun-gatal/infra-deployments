@@ -34,7 +34,6 @@ nessie_plan:
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${NESSIE_MODULE} &&
-        export $(grep -v '^#' /opt/.tf.env | xargs) &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
         terraform plan -var-file=/opt/.tfvars -compact-warnings
       "
