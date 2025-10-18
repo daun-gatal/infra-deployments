@@ -26,7 +26,7 @@ nessie_plan:
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${NESSIE_MODULE} && mkdir -p ${OUTPUT_DIR}/${NESSIE_MODULE}"
     - scp -o StrictHostKeyChecking=no -r ./${NESSIE_MODULE} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
-    - scp -o StrictHostKeyChecking=no .tf.env root@${TAILSCALE_SERVER}:opt/
+    - scp -o StrictHostKeyChecking=no -r .tf.env root@${TAILSCALE_SERVER}:opt/
     - echo "✅ Module ${NESSIE_MODULE} copied to remote server"
 
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
