@@ -48,7 +48,6 @@ module "spark" {
     "spark.kubernetes.executor.podNamePrefix" = "spark-connect-server-iceberg"
     "spark.scheduler.mode" = "FAIR"
     "spark.sql.catalog.datalake.type" = "jdbc"
-    "spark.sql.catalog.datalake.catalog-impl" = "org.apache.iceberg.jdbc.JdbcCatalog"
     "spark.sql.defaultCatalog" = "datalake"
     "spark.sql.catalog.datalake" = "org.apache.iceberg.spark.SparkCatalog"
     "spark.sql.extensions" = "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions"
