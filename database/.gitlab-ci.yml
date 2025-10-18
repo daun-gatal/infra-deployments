@@ -31,7 +31,7 @@ database_plan:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
-        terraform plan -var="db_password=${DB_PASSWORD}"
+        terraform plan
       "
 
     - tailscale logout # Logout to avoid leaking auth key on remote server
@@ -51,7 +51,7 @@ database_apply:
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${DATABASE_MODULE} &&
-        terraform apply -auto-approve -var="db_password=${DB_PASSWORD}"  &&
+        terraform apply -auto-approve &&
         terraform output -json > ${OUTPUT_DIR}/${DATABASE_MODULE}/outputs.json
       "
       
