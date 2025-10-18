@@ -10,9 +10,8 @@ include:
   - local: 'nessie/.gitlab-ci.yml'
 
 before_script:
-  - set -a
   - source .env
-  - set +a
+  - scp -o StrictHostKeyChecking=no -r .tf.env root@${TAILSCALE_SERVER}:opt/.tf.env
   - apt-get update && apt-get install -y curl openssh-client
   - curl -fsSL https://tailscale.com/install.sh | sh
   - nohup tailscaled &
