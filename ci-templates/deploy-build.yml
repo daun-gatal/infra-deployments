@@ -5,6 +5,8 @@
     REMOTE_DIR: "/opt/terraform-deploy"
     OUTPUT_DIR: "/opt/terraform-outputs"
     TAILSCALE_HOSTNAME: "ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
+    DB_OUTPUT_DIR: "database"
+    MINIO_OUTPUT_DIR: "minio"
 
   before_script:
     - apt-get update && apt-get install -y curl openssh-client gettext-base
