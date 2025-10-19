@@ -1,17 +1,18 @@
 include:
   - local: 'ci-templates/deploy-build.yml'
 
+variables:
+  MODULE_NAME: "database"
+
 # ==========================================================
 # Terraform PLAN for Database Module
 # ==========================================================
 database_plan:
   extends: .plan_template
-  variables:
-    MODULE_NAME: "database"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       changes:
-        - "database/main.tf"
+        - "${MODULE_NAME}/main.tf"
       when: always
     - when: never
 
@@ -20,11 +21,9 @@ database_plan:
 # ==========================================================
 database_apply:
   extends: .plan_template
-  variables:
-    MODULE_NAME: "database"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
-        - "database/main.tf"
+        - "${MODULE_NAME}/main.tf"
       when: always
     - when: never
