@@ -36,3 +36,5 @@ module "metabase" {
   metabase_db_name     = "metabase"
   tailscale_expose     = true
 }
+
+# Add comments here

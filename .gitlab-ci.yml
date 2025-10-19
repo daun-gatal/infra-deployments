@@ -13,11 +13,6 @@ include:
   - local: 'metabase/.gitlab-ci.yml'
   - local: 'airflow/.gitlab-ci.yml'
 
-before_script:
-  - source .env
-  - export $(grep -v '^#' .env | cut -d= -f1)
-  - apt-get update && apt-get install -y curl openssh-client gettext-base
-
 dummy_job:
   stage: dummy
   image: alpine:latest
