@@ -43,7 +43,7 @@ module "spark" {
     "spark.hadoop.fs.s3a.path.style.access" = "true"
     "spark.hadoop.fs.s3a.secret.key" = local.minio.minio_root_password.value
     "spark.jars.ivy" = "/tmp/.ivy2.5.2"
-    "spark.jars.packages" = "org.apache.hadoop:hadoop-aws:3.4.1,org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.0,org.postgresql:postgresql:42.7.3"
+    "spark.jars.packages" = "org.apache.hadoop:hadoop-aws:3.4.1,org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.0,org.postgresql:postgresql:42.7.3,org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.1"
     "spark.kubernetes.driver.pod.excludedFeatureSteps" = "org.apache.spark.deploy.k8s.features.KerberosConfDriverFeatureStep"
     "spark.kubernetes.executor.podNamePrefix" = "spark-connect-server-iceberg"
     "spark.scheduler.mode" = "FAIR"
