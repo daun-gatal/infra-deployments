@@ -1,18 +1,19 @@
 include:
   - local: 'ci-templates/deploy-build.yml'
 
-variables:
-  MODULE_NAME: "spark"
-
 # ==========================================================
 # Terraform PLAN for Spark Module
 # ==========================================================
 spark_plan:
   extends: .plan_template
+  variables:
+    MODULE_NAME: "spark"
 
 # ==========================================================
 # Terraform APPLY for Spark Module
 # ==========================================================
 spark_apply:
   extends: .apply_template
+  variables:
+    MODULE_NAME: "spark"
     

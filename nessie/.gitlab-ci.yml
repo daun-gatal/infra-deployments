@@ -1,18 +1,19 @@
 include:
   - local: 'ci-templates/deploy-build.yml'
 
-variables:
-  MODULE_NAME: "nessie"
-
 # ==========================================================
 # Terraform PLAN for Nessie Module
 # ==========================================================
 nessie_plan:
   extends: .plan_template
+  variables:
+    MODULE_NAME: "nessie"
 
 # ==========================================================
 # Terraform APPLY for Nessie Module
 # ==========================================================
 nessie_apply:
   extends: .apply_template
+  variables:
+    MODULE_NAME: "nessie"
     

@@ -1,17 +1,18 @@
 include:
   - local: 'ci-templates/deploy-build.yml'
 
-variables:
-  MODULE_NAME: "kafka"
-
 # ==========================================================
 # Terraform PLAN for Kafka Module
 # ==========================================================
 kafka_plan:
   extends: .plan_template
+  variables:
+    MODULE_NAME: "kafka"
 
 # ==========================================================
 # Terraform APPLY for Kafka Module
 # ==========================================================
 kafka_apply:
   extends: .apply_template
+  variables:
+    MODULE_NAME: "kafka"

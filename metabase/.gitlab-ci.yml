@@ -1,18 +1,19 @@
 include:
   - local: 'ci-templates/deploy-build.yml'
 
-variables:
-  MODULE_NAME: "metabase"
-
 # ==========================================================
 # Terraform PLAN for Metabase Module
 # ==========================================================
 metabase_plan:
   extends: .plan_template
+  variables:
+    MODULE_NAME: "metabase"
 
 # ==========================================================
 # Terraform APPLY for Metabase Module
 # ==========================================================
 metabase_apply:
   extends: .apply_template
+  variables:
+    MODULE_NAME: "metabase"
     

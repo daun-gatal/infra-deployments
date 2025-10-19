@@ -1,17 +1,18 @@
 include:
   - local: 'ci-templates/deploy-build.yml'
 
-variables:
-  MODULE_NAME: "database"
-
 # ==========================================================
 # Terraform PLAN for Database Module
 # ==========================================================
 database_plan:
   extends: .plan_template
+  variables:
+    MODULE_NAME: "database"
 
 # ==========================================================
 # Terraform APPLY for Database Module
 # ==========================================================
 database_apply:
   extends: .apply_template
+  variables:
+    MODULE_NAME: "database"

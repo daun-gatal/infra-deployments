@@ -1,18 +1,19 @@
 include:
   - local: 'ci-templates/deploy-build.yml'
 
-variables:
-  MODULE_NAME: "minio"
-
 # ==========================================================
 # Terraform PLAN for Minio Module
 # ==========================================================
 minio_plan:
   extends: .plan_template
+  variables:
+    MODULE_NAME: "minio"
 
 # ==========================================================
 # Terraform APPLY for minio Module
 # ==========================================================
 minio_apply:
   extends: .apply_template
+  variables:
+    MODULE_NAME: "minio"
     
