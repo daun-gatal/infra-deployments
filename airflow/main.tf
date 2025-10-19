@@ -32,7 +32,6 @@ module "airflow" {
   
   
   image_repository = "registry.gitlab.com/daun-gatal/image-repo/airflow"
-  image_tag        = "latest"
   
   # Executor configuration
   airflow_executor = "CeleryExecutor"
