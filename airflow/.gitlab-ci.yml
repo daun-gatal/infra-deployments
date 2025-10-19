@@ -1,0 +1,63 @@
+# ==========================================================
+# Terraform PLAN for Airflow Module
+# ==========================================================
+airflow_plan:
+  stage: plan
+  image: ubuntu:22.04
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      changes:
+        - "airflow/main.tf"
+      when: always
+    - when: never
+  script:
+    - |
+      cat > ${AIRFLOW_MODULE}/backend.hcl <<EOF
+      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${AIRFLOW_MODULE}"
+      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${AIRFLOW_MODULE}/lock"
+      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${AIRFLOW_MODULE}/lock"
+      lock_method     = "POST"
+      unlock_method   = "DELETE"
+      retry_wait_min  = 5
+      username        = "${GITLAB_USERNAME}"
+      password        = "${GITLAB_TOKEN}"
+      EOF
+      echo "✅ Created backend.hcl for module: ${AIRFLOW_MODULE}"
+
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${AIRFLOW_MODULE} && mkdir -p ${OUTPUT_DIR}/${AIRFLOW_MODULE}"
+    - scp -o StrictHostKeyChecking=no -r ./${AIRFLOW_MODULE} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
+
+    - envsubst < .tf.env > .tfvars
+    - scp -o StrictHostKeyChecking=no .tfvars root@${TAILSCALE_SERVER}:/opt/.tfvars
+
+    - echo "✅ Module ${AIRFLOW_MODULE} copied to remote server"
+
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+        cd ${REMOTE_DIR}/${AIRFLOW_MODULE} &&
+        terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
+        terraform plan -var-file=/opt/.tfvars -compact-warnings
+      "
+  tags:
+    - k8s
+
+# ==========================================================
+# Terraform APPLY for Airflow Module
+# ==========================================================
+airflow_apply:
+  stage: apply
+  image: ubuntu:22.04
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - "airflow/main.tf"
+      when: always
+    - when: never
+  script:
+    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+        cd ${REMOTE_DIR}/${AIRFLOW_MODULE} &&
+        terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings &&
+        terraform output -json > ${OUTPUT_DIR}/${AIRFLOW_MODULE}/outputs.json
+      "
+  tags:
+    - k8s
+    
