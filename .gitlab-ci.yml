@@ -11,6 +11,7 @@ include:
   - local: 'nessie/.gitlab-ci.yml'
   - local: 'trino/.gitlab-ci.yml'
   - local: 'metabase/.gitlab-ci.yml'
+  - local: 'airflow/.gitlab-ci.yml'
 
 before_script:
   - source .env
