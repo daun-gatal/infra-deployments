@@ -31,6 +31,9 @@ module "airflow" {
   source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/airflow?ref=main"
   
   
+  image_repository = "registry.gitlab.com/daun-gatal/image-repo/airflow"
+  image_tag        = "latest"
+  
   # Executor configuration
   airflow_executor = "CeleryExecutor"
   
