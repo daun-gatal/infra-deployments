@@ -9,6 +9,13 @@
   before_script:
     - apt-get update && apt-get install -y curl openssh-client gettext-base
 
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      changes:
+        - "${MODULE_NAME}/main.tf"
+      when: always
+    - when: never
+
   script:
     - |
       cat > ${MODULE_NAME}/backend.hcl <<EOF
@@ -49,6 +56,13 @@
 
   before_script:
     - apt-get update && apt-get install -y curl openssh-client gettext-base
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - "${MODULE_NAME}/main.tf"
+      when: always
+    - when: never
 
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "

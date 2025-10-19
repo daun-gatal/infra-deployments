@@ -9,21 +9,9 @@ variables:
 # ==========================================================
 database_plan:
   extends: .plan_template
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-      changes:
-        - "${MODULE_NAME}/main.tf"
-      when: always
-    - when: never
 
 # ==========================================================
 # Terraform APPLY for Database Module
 # ==========================================================
 database_apply:
-  extends: .plan_template
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - "${MODULE_NAME}/main.tf"
-      when: always
-    - when: never
+  extends: .apply_template
