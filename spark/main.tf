@@ -27,7 +27,7 @@ locals {
   minio = jsondecode(file(var.minio_credentials_path))
 }
 
-module "spark" {
+module "spark_conn" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/spark?ref=main"
 
   tailscale_expose = true
@@ -56,6 +56,7 @@ module "spark" {
     "spark.sql.catalog.datalake.jdbc.user" = local.db.postgres_username.value
     "spark.sql.catalog.datalake.jdbc.password" = local.db.postgres_password.value
     "spark.kubernetes.container.image.pullPolicy" = "Always"
+    "spark.kubernetes.allocation.pods.allocator" = "statefulset"
   }
 }
 
