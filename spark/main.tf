@@ -39,7 +39,7 @@ module "spark_conn" {
   spark_connect_dynamic_allocation_max_executors = 3
   spark_connect_dynamic_allocation_shuffle_tracking_enabled = true
 
-  extra_spark_conf = {
+  extra_spark = {
     "spark.hadoop.fs.s3a.access.key" = local.minio.minio_root_user.value
     "spark.hadoop.fs.s3a.endpoint" = "http://${local.minio.minio_service_dns.value}:${local.minio.minio_service_port.value}"
     "spark.hadoop.fs.s3a.path.style.access" = "true"
