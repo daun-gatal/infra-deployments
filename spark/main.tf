@@ -27,7 +27,7 @@ locals {
   minio = jsondecode(file(var.minio_credentials_path))
 }
 
-module "spark_conn" {
+module "spark" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/spark?ref=main"
 
   tailscale_expose = true
@@ -39,7 +39,7 @@ module "spark_conn" {
   spark_connect_dynamic_allocation_max_executors = 3
   spark_connect_dynamic_allocation_shuffle_tracking_enabled = true
 
-  extra_spark = {
+  extra_spark_conf = {
     "spark.hadoop.fs.s3a.access.key" = local.minio.minio_root_user.value
     "spark.hadoop.fs.s3a.endpoint" = "http://${local.minio.minio_service_dns.value}:${local.minio.minio_service_port.value}"
     "spark.hadoop.fs.s3a.path.style.access" = "true"
