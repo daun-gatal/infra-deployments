@@ -55,6 +55,7 @@ module "spark" {
     "spark.sql.catalog.datalake.uri" = "jdbc:postgresql://${local.db.postgres_rw_dns.value}:5432/datalake"
     "spark.sql.catalog.datalake.jdbc.user" = local.db.postgres_username.value
     "spark.sql.catalog.datalake.jdbc.password" = local.db.postgres_password.value
+    "spark.kubernetes.container.image.pullPolicy" = "Always"
   }
 }
 
