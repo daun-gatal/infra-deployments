@@ -35,6 +35,7 @@ module "metabase" {
   metabase_db_port     = 5432
   metabase_db_name     = "metabase"
   tailscale_expose     = true
+  tailscale_funnel    = true
 }
 
 # Add comments here v1
