@@ -45,7 +45,7 @@ module "trino_readonly" {
         "iceberg.jdbc-catalog.connection-url"          = "jdbc:postgresql://${local.db.postgres_rw_dns.value}:5432/datalake"
         "iceberg.jdbc-catalog.connection-user"         = local.db.postgres_username.value
         "iceberg.jdbc-catalog.connection-password"     = local.db.postgres_password.value
-        "iceberg.jdbc-catalog.default-warehouse-dir"   = "s3://datalake/warehouses"
+        "iceberg.jdbc-catalog.default-warehouse-dir"   = "s3://datalake/warehouse"
         "fs.native-s3.enabled"                         = "true"
         "s3.endpoint"                                  = "http://${local.minio.minio_service_dns.value}:${local.minio.minio_service_port.value}"
         "s3.region"                                    = "us-east-1"
