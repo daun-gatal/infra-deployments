@@ -31,7 +31,6 @@ module "postgres_db" {
   db_password  = var.db_password
   storage_size = "30Gi"
   extra_db_names = ["airflow", "metabase", "nessie", "gravitino", "datalake", "keycloak"]
-  enable_resource_allocation = true
 }
 
 output "postgres_rw_dns" {
