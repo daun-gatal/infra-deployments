@@ -63,7 +63,7 @@
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
         - "${MODULE_NAME}/main.tf"
-      when: always
+      when: manual
     - when: never
 
   script:
