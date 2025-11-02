@@ -62,57 +62,6 @@ module "airflow" {
   airflow_worker_keda_enabled = true
   airflow_worker_keda_min_replicas = 1
 
-  airflow_component_resources = {
-    scheduler = {
-      limits = {
-        cpu    = "500m"
-        memory = "1024Mi"
-      }
-    }
-    cleanup = {
-      limits = {
-        cpu    = "500m"
-        memory = "1024Mi"
-      }
-    }
-    dagProcessor = {
-      limits = {
-        cpu    = "1000m"
-        memory = "2048Mi"
-      }
-    }
-    apiServer = {
-      limits = {
-        cpu    = "500m"
-        memory = "1024Mi"
-      }
-    }
-    triggerer = {
-      limits = {
-        cpu    = "500m"
-        memory = "1024Mi"
-      }
-    }
-    gitSync = {
-      limits = {
-        cpu    = "500m"
-        memory = "1024Mi"
-      }
-    }
-    worker = {
-      limits = {
-        cpu    = "1000m"
-        memory = "2048Mi"
-      }
-    }
-    flower = {
-      limits = {
-        cpu    = "500m"
-        memory = "1024Mi"
-      }
-    }
-  }
-
   tailscale_expose = true
 }
 
