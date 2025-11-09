@@ -55,23 +55,6 @@ module "trino_readonly" {
       }
     }
   ]
-
-  trino_access_control_entries = [
-    {
-      user  = "admin"
-      role  = ".*"
-      group = ".*"
-      catalogs = [
-        { catalog = ".*", allow = "all" }
-      ]
-      schemas = [
-        { catalog = ".*", schema = ".*", owner = false }
-      ]
-      tables = [
-        { catalog = ".*", schema = ".*", table = ".*", privileges = ["SELECT"] }
-      ]
-    }
-  ]
 }
 
 # Add comments v3
