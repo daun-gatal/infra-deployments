@@ -55,6 +55,39 @@ module "trino_readonly" {
       }
     }
   ]
+
+  trino_access_control_entries = [
+    {
+      user  = "admin"
+      role  = ".*"
+      group = ".*"
+      catalogs = [
+        { catalog = ".*", allow = "all" }
+      ]
+      schemas = [
+        { catalog = ".*", schema = ".*", owner = false }
+      ]
+      tables = [
+        { catalog = ".*", schema = ".*", table = ".*", privileges = ["SELECT"] }
+      ]
+    },
+    {
+      user  = "metabase"
+      role  = ".*"
+      group = ".*"
+      catalogs = [
+        { catalog = "datalake", allow = "read-only" }
+      ]
+      schemas = [
+        { catalog = "datalake", schema = "tmdb", owner = false },
+        { catalog = "datalake", schema = "refined", owner = false }
+      ]
+      tables = [
+        { catalog = "datalake", schema = "tmdb", table = "movies", privileges = ["SELECT"] },
+        { catalog = "datalake", schema = "refined", table = "movies", privileges = ["SELECT"] }
+      ]
+    }
+  ]
 }
 
 # Add comments v3
