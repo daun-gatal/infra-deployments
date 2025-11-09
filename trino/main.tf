@@ -70,22 +70,6 @@ module "trino_readonly" {
       tables = [
         { catalog = ".*", schema = ".*", table = ".*", privileges = ["SELECT"] }
       ]
-    },
-    {
-      user  = "metabase"
-      role  = ".*"
-      group = ".*"
-      catalogs = [
-        { catalog = "datalake", allow = "read-only" }
-      ]
-      schemas = [
-        { catalog = "datalake", schema = "tmdb", owner = false },
-        { catalog = "datalake", schema = "refined", owner = false }
-      ]
-      tables = [
-        { catalog = "datalake", schema = "tmdb", table = "movies", privileges = ["SELECT"] },
-        { catalog = "datalake", schema = "refined", table = "movies", privileges = ["SELECT"] }
-      ]
     }
   ]
 }
