@@ -62,6 +62,7 @@ module "airflow" {
   airflow_flower_enabled = true
   airflow_worker_keda_enabled = true
   airflow_worker_keda_min_replicas = 1
+  airflow_worker_keda_max_replicas = 2
 
   tailscale_expose = true
 }
