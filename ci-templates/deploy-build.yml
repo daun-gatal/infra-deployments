@@ -43,7 +43,7 @@
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_NAME} &&
         terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
-        terraform plan -var-file=/opt/.tfvars -compact-warnings
+        terraform plan -var-file=/opt/.tfvars -compact-warnings -out=tfplan
       "
   tags:
     - k8s
@@ -69,7 +69,7 @@
   script:
     - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
         cd ${REMOTE_DIR}/${MODULE_NAME} &&
-        terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings &&
+        terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings tfplan &&
         terraform output -json > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json
       "
   tags:
