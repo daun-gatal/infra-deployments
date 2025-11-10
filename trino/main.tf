@@ -55,6 +55,13 @@ module "trino_readonly" {
       }
     }
   ]
+
+  trino_acl_path = "/opt/terraform-outputs/trino/outputs.json"
 }
 
-# Add comments v3
+output "trino_acl" {
+  description = "Username for the Postgres"
+  value       = module.trino_readonly.trino_acl
+  sensitive   = true
+}
+# Add comments v4
