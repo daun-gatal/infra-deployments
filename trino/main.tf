@@ -62,4 +62,4 @@ output "trino_acl" {
   value       = jsondecode(module.trino_readonly.trino_acl)
   sensitive   = true
 }
-# Add comments v4
+# Add comments v5

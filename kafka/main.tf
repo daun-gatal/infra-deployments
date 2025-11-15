@@ -46,4 +46,4 @@ output "kafka_int_bootstrap_servers" {
   value       = module.kafka.kafka_int_bootstrap_servers
 }
 
-# add comments v7
+# add comments v8
