@@ -41,8 +41,6 @@
     - tar -C . -cf - ${MODULE_NAME} | tailscale ssh root@${TAILSCALE_SERVER} -- "tar -C ${REMOTE_DIR} -xf -"
     
     - envsubst < .tf.env > .tfvars
-    - scp -o StrictHostKeyChecking=no .tfvars root@${TAILSCALE_SERVER}:/opt/.tfvars
-    
     - tailscale ssh root@${TAILSCALE_SERVER} -- "cat > /opt/.tfvars" < .tfvars
 
     - tailscale ssh root@${TAILSCALE_SERVER} -- "
