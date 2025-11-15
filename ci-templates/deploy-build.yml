@@ -58,9 +58,13 @@
     REMOTE_DIR: "/opt/terraform-deploy"
     OUTPUT_DIR: "/opt/terraform-outputs"
     TAILSCALE_HOSTNAME: "ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
-
   before_script:
     - apt-get update && apt-get install -y curl openssh-client gettext-base
+    - mkdir -p /var/run/tailscale
+    - curl -fsSL https://tailscale.com/install.sh | sh
+    - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
+    - sleep 5
+    - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --accept-routes --hostname="gitlab-runner-$(head /dev/urandom | tr -dc a-z0-9 | head -c6)" --advertise-tags=tag:git
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
