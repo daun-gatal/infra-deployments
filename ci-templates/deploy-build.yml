@@ -10,6 +10,11 @@
 
   before_script:
     - apt-get update && apt-get install -y curl openssh-client gettext-base
+    - mkdir -p /var/run/tailscale
+    - curl -fsSL https://tailscale.com/install.sh | sh
+    - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
+    - sleep 5
+    - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --accept-routes --hostname="gitlab-runner-$(head /dev/urandom | tr -dc a-z0-9 | head -c6)" --advertise-tags=tag:git
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
@@ -20,7 +25,7 @@
 
   script:
     - |
-      cat > ${MODULE_NAME}/backend.hcl <<EOF
+      cat > ${MODULE_NAME}/.backend.hcl <<EOF
       address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}"
       lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
       unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
@@ -32,17 +37,15 @@
       EOF
       echo "✅ Created backend.hcl for module: ${MODULE_NAME}"
 
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_NAME} && mkdir -p ${OUTPUT_DIR}/${MODULE_NAME}"
-    - scp -o StrictHostKeyChecking=no -r ./${MODULE_NAME} root@${TAILSCALE_SERVER}:${REMOTE_DIR}/
+    - tailscale ssh root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_NAME} && mkdir -p ${OUTPUT_DIR}/${MODULE_NAME}"
+    - tar -C . -cf - ${MODULE_NAME} | tailscale ssh root@${TAILSCALE_SERVER} -- "tar -C ${REMOTE_DIR} -xf -"
     
     - envsubst < .tf.env > .tfvars
-    - scp -o StrictHostKeyChecking=no .tfvars root@${TAILSCALE_SERVER}:/opt/.tfvars
-    
-    - echo "✅ Module ${MODULE_NAME} copied to remote server"
+    - tailscale ssh root@${TAILSCALE_SERVER} -- "cat > /opt/.tfvars" < .tfvars
 
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+    - tailscale ssh root@${TAILSCALE_SERVER} -- "
         cd ${REMOTE_DIR}/${MODULE_NAME} &&
-        terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
+        terraform init -upgrade -backend-config=.backend.hcl -migrate-state &&
         terraform plan -var-file=/opt/.tfvars -compact-warnings -out=tfplan
       "
   tags:
@@ -62,12 +65,12 @@
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
-        - "${MODULE_NAME}/main.tf"
+        - "${MODULE_NAME}/main.tf"  
       when: manual
     - when: never
 
   script:
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+    - tailscale ssh root@${TAILSCALE_SERVER} -- "
         cd ${REMOTE_DIR}/${MODULE_NAME} &&
         terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings tfplan &&
         terraform output -json > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json
