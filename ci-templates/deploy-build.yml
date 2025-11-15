@@ -10,6 +10,11 @@
 
   before_script:
     - apt-get update && apt-get install -y curl openssh-client gettext-base
+    - curl -fsSL https://tailscale.com/install.sh | sh
+    - mkdir -p /var/run/tailscale
+    - "tailscaled --state=mem: &"
+    - sleep 5
+    - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --advertise-tags=tag:git --accept-routes --hostname="gitlab-$(cat /etc/hostname)"
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
