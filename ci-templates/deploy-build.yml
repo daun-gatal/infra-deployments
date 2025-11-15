@@ -38,7 +38,7 @@
       echo "✅ Created backend.hcl for module: ${MODULE_NAME}"
 
     - tailscale ssh root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_NAME} && mkdir -p ${OUTPUT_DIR}/${MODULE_NAME}"
-    - tailscale ssh root@${TAILSCALE_SERVER} -- "tar -C . -cf - ${MODULE_NAME}" | tailscale ssh root@${TAILSCALE_SERVER} -- "tar -C ${REMOTE_DIR} -xf -"
+    - tar -C . -cf - ${MODULE_NAME} | tailscale ssh root@${TAILSCALE_SERVER} -- "tar -C ${REMOTE_DIR} -xf -"
     
     - envsubst < .tf.env > .tfvars
     - scp -o StrictHostKeyChecking=no .tfvars root@${TAILSCALE_SERVER}:/opt/.tfvars
