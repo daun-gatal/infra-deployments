@@ -25,7 +25,7 @@
 
   script:
     - |
-      cat > ${MODULE_NAME}/backend.hcl <<EOF
+      cat > ${MODULE_NAME}/.backend.hcl <<EOF
       address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}"
       lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
       unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
@@ -45,7 +45,7 @@
 
     - tailscale ssh root@${TAILSCALE_SERVER} -- "
         cd ${REMOTE_DIR}/${MODULE_NAME} &&
-        terraform init -upgrade -backend-config=backend.hcl -migrate-state &&
+        terraform init -upgrade -backend-config=.backend.hcl -migrate-state &&
         terraform plan -var-file=/opt/.tfvars -compact-warnings -out=tfplan
       "
   tags:
@@ -65,12 +65,12 @@
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
-        - "${MODULE_NAME}/main.tf"
+        - "${MODULE_NAME}/main.tf"  
       when: manual
     - when: never
 
   script:
-    - ssh -o StrictHostKeyChecking=no root@${TAILSCALE_SERVER} "
+    - tailscale ssh root@${TAILSCALE_SERVER} -- "
         cd ${REMOTE_DIR}/${MODULE_NAME} &&
         terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings tfplan &&
         terraform output -json > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json
