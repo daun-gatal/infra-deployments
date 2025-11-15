@@ -48,6 +48,7 @@
         terraform init -upgrade -backend-config=.backend.hcl -migrate-state &&
         terraform plan -var-file=/opt/.tfvars -compact-warnings -out=tfplan
       "
+    - tailscale logout
   tags:
     - k8s
 
@@ -79,5 +80,6 @@
         terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings tfplan &&
         terraform output -json > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json
       "
+    - tailscale logout
   tags:
     - k8s
