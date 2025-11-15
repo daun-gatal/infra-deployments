@@ -15,7 +15,7 @@
     - mkdir -p /var/run/tailscale
     - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
     - sleep 5
-    - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --advertise-tags=tag:git --accept-routes=false --accept-dns=false
+    - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --advertise-tags=tag:git --accept-routes
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
