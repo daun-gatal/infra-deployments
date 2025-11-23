@@ -1,0 +1,19 @@
+include:
+  - local: 'ci-templates/deploy-build.yml'
+
+# ==========================================================
+# Terraform PLAN for Openbao Module
+# ==========================================================
+openbao_plan:
+  extends: .plan_template
+  variables:
+    MODULE_NAME: "openbao"
+
+# ==========================================================
+# Terraform APPLY for Openbao Module
+# ==========================================================
+openbao_apply:
+  extends: .apply_template
+  variables:
+    MODULE_NAME: "openbao"
+    
