@@ -30,7 +30,7 @@ module "postgres_db" {
   db_user      = "admin"
   db_password  = var.db_password
   storage_size = "30Gi"
-  extra_db_names = ["airflow", "metabase", "datalake", "openwebui", "openbao_db"]
+  extra_db_names = ["airflow", "metabase", "datalake", "openwebui", "openbaodb"]
 }
 
 output "postgres_rw_dns" {
