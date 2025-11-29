@@ -39,6 +39,7 @@ module "kafka" {
   kafka_ui_tailscale_expose = true
 
   enable_schema_registry = true
+  enable_ksqldb = true
 }
 
 output "kafka_int_bootstrap_servers" {
@@ -51,4 +52,8 @@ output "kafka_schema_registry_url" {
   value       = module.kafka.schema_registry_url
 }
 
+output "kafka_ksqldb_url" {
+  description = "KSQLDB URL for client application"
+  value = module.kafka.ksqldb_url
+}
 # add comments v8
