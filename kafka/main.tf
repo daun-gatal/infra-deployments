@@ -30,6 +30,7 @@ module "kafka_node_controller" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/node?ref=main"
 
   kafka_roles = ["controller"]
+  kafka_node_pool_name = "controller-pool"
   kafka_cluster_name = local.kafka_cluster_name
   storage_size = "5Gi"
   storage_type = "persistent-claim"
@@ -39,6 +40,7 @@ module "kafka_node_broker" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/node?ref=main"
 
   kafka_roles = ["broker"]
+  kafka_node_pool_name = "broker-pool"
   kafka_cluster_name = local.kafka_cluster_name
   kafka_replicas = 3
   storage_size = "5Gi"
@@ -52,6 +54,7 @@ module "kafka_cluster" {
 }
 
 module "schema_registry" {
+  depends_on = [ module.kafka_node_controller, module.kafka_node_broker, module.kafka_cluster ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/schema-registry?ref=main"
 
   kafka_bootstrap_servers = ["PLAINTEXT://${module.kafka_cluster.kafka_int_bootstrap_servers}"]
@@ -59,6 +62,7 @@ module "schema_registry" {
 }
 
 module "ksqldb" {
+  depends_on = [ module.kafka_node_controller, module.kafka_node_broker, module.kafka_cluster, module.schema_registry ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ksqldb?ref=main"
 
   kafka_bootstrap_servers = ["PLAINTEXT://${module.kafka_cluster.kafka_int_bootstrap_servers}"]
@@ -67,6 +71,7 @@ module "ksqldb" {
 }
 
 module "ui" {
+  depends_on = [ module.kafka_node_controller, module.kafka_node_broker, module.kafka_cluster, module.schema_registry, module.ksqldb ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ui?ref=main"
 
   kafka_bootstrap_servers = [module.kafka_cluster.kafka_int_bootstrap_servers]
