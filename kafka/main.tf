@@ -22,38 +22,71 @@ provider "helm" {
   }
 }
 
-module "kafka" {
-  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka?ref=main"
+locals {
+  kafka_cluster_name = "kafka-cluster"
+}
 
-  kafka_replicas = 2
-  storage_delete_claim = true
-  offsets_topic_replication_factor = 2
-  transaction_state_log_replication_factor = 2
-  transaction_state_log_min_isr = 2
-  default_replication_factor = 2
-  min_insync_replicas = 2
+module "kafka_node_controller" {
+  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/node?ref=main"
+
+  kafka_roles = ["controller"]
+  kafka_cluster_name = local.kafka_cluster_name
+  storage_size = "5Gi"
   storage_type = "persistent-claim"
-  storage_size = "20Gi"
+}
 
-  enable_kafka_ui = true
-  kafka_ui_tailscale_expose = true
+module "kafka_node_broker" {
+  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/node?ref=main"
 
-  enable_schema_registry = true
-  enable_ksqldb = true
+  kafka_roles = ["broker"]
+  kafka_cluster_name = local.kafka_cluster_name
+  kafka_replicas = 3
+  storage_size = "5Gi"
+  storage_type = "persistent-claim"
+}
+
+module "kafka_cluster" {
+  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/cluster?ref=main"
+
+  kafka_cluster_name = local.kafka_cluster_name
+}
+
+module "schema_registry" {
+  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/schema-registry?ref=main"
+
+  kafka_bootstrap_servers = ["PLAINTEXT://${module.kafka_cluster.kafka_int_bootstrap_servers}"]
+  tailscale_expose = false
+}
+
+module "ksqldb" {
+  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ksqldb?ref=main"
+
+  kafka_bootstrap_servers = ["PLAINTEXT://${module.kafka_cluster.kafka_int_bootstrap_servers}"]
+  kafka_schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
+  tailscale_expose = false
+}
+
+module "ui" {
+  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ui?ref=main"
+
+  kafka_bootstrap_servers = [module.kafka_cluster.kafka_int_bootstrap_servers]
+  kafka_schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
+  kafka_ksqldb_url = "http://${module.ksqldb.ksqldb_internal_dns}:${module.ksqldb.ksqldb_port}"
+  tailscale_expose = true
 }
 
 output "kafka_int_bootstrap_servers" {
   description = "Kafka bootstrap servers connection string for client applications"
-  value       = module.kafka.kafka_int_bootstrap_servers
+  value       = module.kafka_cluster.kafka_int_bootstrap_servers
 }
 
 output "kafka_schema_registry_url" {
   description = "Schema Registry URL for client applications"
-  value       = module.kafka.schema_registry_url
+  value       = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
 }
 
 output "kafka_ksqldb_url" {
   description = "KSQLDB URL for client application"
-  value = module.kafka.ksqldb_url
+  value = "http://${module.ksqldb.ksqldb_internal_dns}:${module.ksqldb.ksqldb_port}"
 }
 # add comments v8
