@@ -37,13 +37,18 @@ module "kafka" {
 
   enable_kafka_ui = true
   kafka_ui_tailscale_expose = true
-  kafka_ui_auth_enabled = true
-  kafka_ui_auth_password = var.kafka_ui_auth_password
+
+  enable_schema_registry = true
 }
 
 output "kafka_int_bootstrap_servers" {
   description = "Kafka bootstrap servers connection string for client applications"
   value       = module.kafka.kafka_int_bootstrap_servers
+}
+
+output "kafka_schema_registry_url" {
+  description = "Schema Registry URL for client applications"
+  value       = module.kafka.schema_registry_url
 }
 
 # add comments v8
