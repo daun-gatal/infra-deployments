@@ -63,7 +63,7 @@ module "schema_registry" {
   tailscale_expose = false
 }
 
-module "kafka_connect" {
+module "connect" {
   depends_on = [ module.kafka_node_controller, module.kafka_node_broker, module.kafka_cluster, module.schema_registry ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/connect?ref=main"
 
@@ -82,7 +82,7 @@ module "ksqldb" {
 }
 
 module "ui" {
-  depends_on = [ module.kafka_node_controller, module.kafka_node_broker, module.kafka_cluster, module.schema_registry, module.ksqldb, module.kafka_connect ]
+  depends_on = [ module.kafka_node_controller, module.kafka_node_broker, module.kafka_cluster, module.schema_registry, module.ksqldb, module.connect ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ui?ref=main"
   
   kafka_ui_version = "main"
@@ -101,7 +101,7 @@ output "kafka_schema_registry_url" {
 
 output "kafka_connect_url" {
   description = "Kafka Connect URL for client application"
-  value = "http://${module.kafka_connect.kafka_connect_internal_dns}:${module.kafka_connect.kafka_connect_port}"
+  value = "http://${module.connect.kafka_connect_internal_dns}:${module.kafka_connect.kafka_connect_port}"
 }
 
 output "kafka_ksqldb_url" {
