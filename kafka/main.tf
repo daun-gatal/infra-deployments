@@ -101,7 +101,7 @@ output "kafka_schema_registry_url" {
 
 output "kafka_connect_url" {
   description = "Kafka Connect URL for client application"
-  value = "http://${module.connect.kafka_connect_internal_dns}:${module.kafka_connect.kafka_connect_port}"
+  value = "http://${module.connect.kafka_connect_internal_dns}:${module.connect.kafka_connect_port}"
 }
 
 output "kafka_ksqldb_url" {
