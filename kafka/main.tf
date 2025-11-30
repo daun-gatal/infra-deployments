@@ -84,11 +84,7 @@ module "ksqldb" {
 module "ui" {
   depends_on = [ module.kafka_node_controller, module.kafka_node_broker, module.kafka_cluster, module.schema_registry, module.ksqldb, module.kafka_connect ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ui?ref=main"
-
-  kafka_bootstrap_servers = [module.kafka_cluster.kafka_int_bootstrap_servers]
-  kafka_schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
-  kafka_ksqldb_url = "http://${module.ksqldb.ksqldb_internal_dns}:${module.ksqldb.ksqldb_port}"
-  kafka_connect_url = "http://${module.kafka_connect.kafka_connect_internal_dns}:${module.kafka_connect.kafka_connect_port}"
+  
   kafka_ui_version = "main"
   tailscale_expose = true
 }
