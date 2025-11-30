@@ -26,7 +26,14 @@ locals {
   kafka_cluster_name = "kafka-cluster"
 }
 
+module "kafka_cluster" {
+  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/cluster?ref=main"
+
+  kafka_cluster_name = local.kafka_cluster_name
+}
+
 module "kafka_node_controller" {
+  depends_on = [ module.kafka_cluster ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/node?ref=main"
 
   kafka_roles = ["controller"]
@@ -37,6 +44,7 @@ module "kafka_node_controller" {
 }
 
 module "kafka_node_broker" {
+  depends_on = [ module.kafka_cluster ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/node?ref=main"
 
   kafka_roles = ["broker"]
@@ -45,12 +53,6 @@ module "kafka_node_broker" {
   kafka_replicas = 3
   storage_size = "5Gi"
   storage_type = "persistent-claim"
-}
-
-module "kafka_cluster" {
-  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/cluster?ref=main"
-
-  kafka_cluster_name = local.kafka_cluster_name
 }
 
 module "schema_registry" {
