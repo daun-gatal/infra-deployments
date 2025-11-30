@@ -79,6 +79,7 @@ module "ui" {
   kafka_bootstrap_servers = [module.kafka_cluster.kafka_int_bootstrap_servers]
   kafka_schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
   kafka_ksqldb_url = "http://${module.ksqldb.ksqldb_internal_dns}:${module.ksqldb.ksqldb_port}"
+  kafka_ui_version = "main"
   tailscale_expose = true
 }
 
