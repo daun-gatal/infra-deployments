@@ -19,3 +19,4 @@ kafka_apply:
   needs:
     - job: kafka_plan
       artifacts: true
+      optional: true
