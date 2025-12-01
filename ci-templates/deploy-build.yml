@@ -42,7 +42,9 @@
   artifacts:
     name: "plan-${MODULE_NAME}"
     paths:
-      - ${MODULE_NAME}/tfplan
+    - ${MODULE_NAME}/tfplan
+    - ${MODULE_NAME}/.terraform.lock.hcl
+    - ${MODULE_NAME}/.terraform/providers
     expire_in: 1 hour
   tags:
     - k8s
