@@ -1,14 +1,19 @@
 .plan_template:
   stage: plan
-  image: hashicorp/terraform:1.14.0
+  image: ubuntu:22.04
   variables:
     KUBECONFIG: "$KUBECONFIG_FILE"
     DB_OUTPUT_DIR: "database"
     MINIO_OUTPUT_DIR: "minio"
 
   before_script:
-    - apk update
-    - apk add --no-cache curl openssh-client bash gettext
+    - apt-get update && apt-get install -y curl openssh-client gettext-base gnupg software-properties-common wget
+
+    - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" > /etc/apt/sources.list.d/hashicorp.list
+    - apt-get update
+    - apt-get install -y terraform
+
     - mkdir -p /var/run/tailscale
     - curl -fsSL https://tailscale.com/install.sh | sh
     - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
@@ -54,13 +59,18 @@
 
 .apply_template:
   stage: apply
-  image: hashicorp/terraform:1.14.0
+  image: ubuntu:22.04
   variables:
     KUBECONFIG: "$KUBECONFIG_FILE"
     OUTPUT_DIR: "/opt/terraform-outputs"
   before_script:
-    - apk update
-    - apk add --no-cache curl openssh-client bash gettext
+    - apt-get update && apt-get install -y curl openssh-client gettext-base gnupg software-properties-common wget
+
+    - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" > /etc/apt/sources.list.d/hashicorp.list
+    - apt-get update
+    - apt-get install -y terraform
+
     - mkdir -p /var/run/tailscale
     - curl -fsSL https://tailscale.com/install.sh | sh
     - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
