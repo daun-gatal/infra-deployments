@@ -2,23 +2,13 @@
   stage: plan
   image: ubuntu:22.04
   variables:
-    KUBECONFIG: "$KUBECONFIG_FILE"
+    KUBECONFIG: "${KUBECONFIG_FILE}"
     DB_OUTPUT_DIR: "database"
     MINIO_OUTPUT_DIR: "minio"
 
   before_script:
-    - apt-get update && apt-get install -y curl openssh-client gettext-base gnupg software-properties-common wget
-
-    - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
-    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" > /etc/apt/sources.list.d/hashicorp.list
-    - apt-get update
-    - apt-get install -y terraform
-
-    - mkdir -p /var/run/tailscale
-    - curl -fsSL https://tailscale.com/install.sh | sh
-    - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
-    - sleep 5
-    - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --accept-routes --hostname="gitlab-runner-${MODULE_NAME}-$(head /dev/urandom | tr -dc a-z0-9 | head -c6)" --advertise-tags=tag:git
+    - chmod +x scripts/ci/setup-env.sh
+    - bash scripts/ci/setup-env.sh
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
@@ -61,21 +51,11 @@
   stage: apply
   image: ubuntu:22.04
   variables:
-    KUBECONFIG: "$KUBECONFIG_FILE"
+    KUBECONFIG: "${KUBECONFIG_FILE}"
     OUTPUT_DIR: "/opt/terraform-outputs"
   before_script:
-    - apt-get update && apt-get install -y curl openssh-client gettext-base gnupg software-properties-common wget
-
-    - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
-    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" > /etc/apt/sources.list.d/hashicorp.list
-    - apt-get update
-    - apt-get install -y terraform
-
-    - mkdir -p /var/run/tailscale
-    - curl -fsSL https://tailscale.com/install.sh | sh
-    - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
-    - sleep 5
-    - tailscale up --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" --accept-routes --hostname="gitlab-runner-${MODULE_NAME}-$(head /dev/urandom | tr -dc a-z0-9 | head -c6)" --advertise-tags=tag:git
+    - chmod +x scripts/ci/setup-env.sh
+    - bash scripts/ci/setup-env.sh
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
