@@ -43,6 +43,7 @@
     name: "plan-${MODULE_NAME}"
     paths:
     - ${MODULE_NAME}/tfplan
+    - ${MODULE_NAME}/.backend.hcl
     - ${MODULE_NAME}/.terraform.lock.hcl
     - ${MODULE_NAME}/.terraform/providers
     expire_in: 1 hour
@@ -68,6 +69,7 @@
 
   script:
     - cd ${MODULE_NAME}
+    - terraform init -backend-config=.backend.hcl
     - terraform apply -auto-approve -compact-warnings tfplan
     - terraform output -json > outputs.json
     - tailscale ssh root@${TAILSCALE_SERVER} -- "mkdir -p ${OUTPUT_DIR}/${MODULE_NAME} && cat > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json" < outputs.json
