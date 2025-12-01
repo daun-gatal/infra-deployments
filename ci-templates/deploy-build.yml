@@ -55,8 +55,6 @@
 .apply_template:
   stage: apply
   image: hashicorp/terraform:1.14.0
-  dependencies:
-    - ${MODULE_NAME}_plan
   variables:
     KUBECONFIG: "$KUBECONFIG_FILE"
     OUTPUT_DIR: "/opt/terraform-outputs"
