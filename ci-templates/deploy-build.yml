@@ -1,15 +1,14 @@
 .plan_template:
   stage: plan
-  image: ubuntu:22.04
+  image: hashicorp/terraform:1.14.0
   variables:
-    REMOTE_DIR: "/opt/terraform-deploy"
-    OUTPUT_DIR: "/opt/terraform-outputs"
-    TAILSCALE_HOSTNAME: "ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
+    KUBECONFIG: "$KUBECONFIG_FILE"
     DB_OUTPUT_DIR: "database"
     MINIO_OUTPUT_DIR: "minio"
 
   before_script:
-    - apt-get update && apt-get install -y curl openssh-client gettext-base
+    - apk update
+    - apk add --no-cache curl openssh-client bash gettext
     - mkdir -p /var/run/tailscale
     - curl -fsSL https://tailscale.com/install.sh | sh
     - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
@@ -36,31 +35,34 @@
       password        = "${GITLAB_TOKEN}"
       EOF
       echo "✅ Created backend.hcl for module: ${MODULE_NAME}"
-
-    - tailscale ssh root@${TAILSCALE_SERVER} "mkdir -p ${REMOTE_DIR}/${MODULE_NAME} && mkdir -p ${OUTPUT_DIR}/${MODULE_NAME}"
-    - tar -C . -cf - ${MODULE_NAME} | tailscale ssh root@${TAILSCALE_SERVER} -- "tar -C ${REMOTE_DIR} -xf -"
     
-    - envsubst < .tf.env > .tfvars
-    - tailscale ssh root@${TAILSCALE_SERVER} -- "cat > /opt/.tfvars" < .tfvars
+    - envsubst < .tf.env > ${MODULE_NAME}/.tfvars
 
-    - tailscale ssh root@${TAILSCALE_SERVER} -- "
-        cd ${REMOTE_DIR}/${MODULE_NAME} &&
-        terraform init -upgrade -backend-config=.backend.hcl -migrate-state &&
-        terraform plan -var-file=/opt/.tfvars -compact-warnings -out=tfplan
-      "
+    # Run Terraform inside module directory
+    - cd ${MODULE_NAME}
+    - terraform init -upgrade -backend-config=.backend.hcl
+    - terraform plan -var-file=.tfvars -compact-warnings -out=tfplan
+
     - tailscale logout
+  artifacts:
+    name: "plan-${MODULE_NAME}"
+    paths:
+      - ${MODULE_NAME}/tfplan
+    expire_in: 1 hour
   tags:
     - k8s
 
 .apply_template:
   stage: apply
-  image: ubuntu:22.04
+  image: hashicorp/terraform:1.14.0
+  dependencies:
+    - ${MODULE_NAME}_plan
   variables:
-    REMOTE_DIR: "/opt/terraform-deploy"
+    KUBECONFIG: "$KUBECONFIG_FILE"
     OUTPUT_DIR: "/opt/terraform-outputs"
-    TAILSCALE_HOSTNAME: "ci-runner-${CI_PROJECT_NAME}-${CI_PIPELINE_ID}"
   before_script:
-    - apt-get update && apt-get install -y curl openssh-client gettext-base
+    - apk update
+    - apk add --no-cache curl openssh-client bash gettext
     - mkdir -p /var/run/tailscale
     - curl -fsSL https://tailscale.com/install.sh | sh
     - "tailscaled --tun=userspace-networking --state=mem: --socket=/var/run/tailscale/tailscaled.sock &"
@@ -75,11 +77,11 @@
     - when: never
 
   script:
-    - tailscale ssh root@${TAILSCALE_SERVER} -- "
-        cd ${REMOTE_DIR}/${MODULE_NAME} &&
-        terraform apply -var-file=/opt/.tfvars -auto-approve -compact-warnings tfplan &&
-        terraform output -json > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json
-      "
+    - cd ${MODULE_NAME}
+    - terraform apply -auto-approve -compact-warnings tfplan
+    - terraform output -json > outputs.json
+    - tailscale ssh root@${TAILSCALE_SERVER} -- "mkdir -p ${OUTPUT_DIR}/${MODULE_NAME} && cat > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json" < outputs.json
+
     - tailscale logout
   tags:
     - k8s
