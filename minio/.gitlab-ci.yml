@@ -16,4 +16,7 @@ minio_apply:
   extends: .apply_template
   variables:
     MODULE_NAME: "minio"
+  needs:
+    - job: minio_plan
+      artifacts: true
     

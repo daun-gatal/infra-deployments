@@ -16,4 +16,6 @@ openbao_apply:
   extends: .apply_template
   variables:
     MODULE_NAME: "openbao"
-    
+  needs:
+    - job: openbao_plan
+      artifacts: true
