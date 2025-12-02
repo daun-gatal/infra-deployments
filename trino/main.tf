@@ -13,18 +13,13 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  config_path = ""
 }
 
 provider "helm" {
   kubernetes = {
-    config_path = "~/.kube/config"
+    config_path = ""
   }
-}
-
-locals {
-  db = jsondecode(file(var.db_credentials_path))
-  minio = jsondecode(file(var.minio_credentials_path))
 }
 
 module "trino_readonly" {
@@ -42,15 +37,15 @@ module "trino_readonly" {
         "iceberg.catalog.type"                         = "jdbc"
         "iceberg.jdbc-catalog.catalog-name"            = "datalake"
         "iceberg.jdbc-catalog.driver-class"            = "org.postgresql.Driver"
-        "iceberg.jdbc-catalog.connection-url"          = "jdbc:postgresql://${local.db.postgres_rw_dns.value}:5432/datalake"
-        "iceberg.jdbc-catalog.connection-user"         = local.db.postgres_username.value
-        "iceberg.jdbc-catalog.connection-password"     = local.db.postgres_password.value
+        "iceberg.jdbc-catalog.connection-url"          = "jdbc:postgresql://${var.db_internal_dns}:5432/datalake"
+        "iceberg.jdbc-catalog.connection-user"         = var.db_user
+        "iceberg.jdbc-catalog.connection-password"     = var.db_password
         "iceberg.jdbc-catalog.default-warehouse-dir"   = "s3://datalake/warehouse"
         "fs.native-s3.enabled"                         = "true"
-        "s3.endpoint"                                  = "http://${local.minio.minio_service_dns.value}:${local.minio.minio_service_port.value}"
+        "s3.endpoint"                                  = "http://${var.minio_internal_dns}:9000"
         "s3.region"                                    = "us-east-1"
-        "s3.aws-access-key"                            = local.minio.minio_root_user.value
-        "s3.aws-secret-key"                            = local.minio.minio_root_password.value
+        "s3.aws-access-key"                            = var.minio_root_user
+        "s3.aws-secret-key"                            = var.minio_root_password
         "s3.path-style-access"                         = "true"
       }
     }
