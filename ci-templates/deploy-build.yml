@@ -77,5 +77,11 @@
     - tailscale ssh root@${TAILSCALE_SERVER} -- "mkdir -p ${OUTPUT_DIR}/${MODULE_NAME} && cat > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json" < outputs.json
 
     - tailscale logout
+    - echo "✅ Terraform apply completed for module: ${MODULE_NAME}"
+
+  after_script:
+    - tailscale logout
+    - echo "🔒 Logged out from Tailscale"
+
   tags:
     - k8s
