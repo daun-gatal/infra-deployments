@@ -68,6 +68,7 @@ module "connect_server" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/connect?ref=main"
 
   tailscale_expose = false
+  kafka_connect_image = "registry.gitlab.com/daun-gatal/image-repo/kafka-connect:7.9.5"
   kafka_bootstrap_servers = [module.kafka_cluster.kafka_int_bootstrap_servers]
   schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
 }
