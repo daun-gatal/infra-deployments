@@ -13,18 +13,13 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  config_path = ""
 }
 
 provider "helm" {
   kubernetes = {
-    config_path = "~/.kube/config"
+    config_path = ""
   }
-}
-
-locals {
-  db = jsondecode(file(var.db_credentials_path))
-  minio = jsondecode(file(var.minio_credentials_path))
 }
 
 module "airflow" {
@@ -38,7 +33,7 @@ module "airflow" {
   airflow_executor = "CeleryExecutor"
   
   # Connect to PostgreSQL for metadata
-  airflow_metadata_db_conn = "postgresql://${local.db.postgres_username.value}:${local.db.postgres_password.value}@${local.db.postgres_rw_dns.value}:5432/airflow"
+  airflow_metadata_db_conn = "postgresql://${var.db_user}:${var.db_password}@${var.db_internal_dns}:5432/airflow"
   
   # Required secrets
   airflow_fernet_key       = var.airflow_fernet_key
@@ -55,9 +50,9 @@ module "airflow" {
   # Connect to MinIO for remote logging
   enable_remote_logging    = true
   airflow_logs_bucket_name = "airflow"
-  aws_access_key_id        = local.minio.minio_root_user.value
-  aws_secret_access_key    = local.minio.minio_root_password.value
-  aws_endpoint_url         = "http://${local.minio.minio_service_dns.value}:${local.minio.minio_service_port.value}"
+  aws_access_key_id        = var.minio_root_user
+  aws_secret_access_key    = var.minio_root_password
+  aws_endpoint_url         = "http://${var.minio_internal_dns}:9000"
 
   airflow_flower_enabled = true
   airflow_worker_keda_enabled = true
