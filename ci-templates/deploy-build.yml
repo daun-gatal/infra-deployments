@@ -38,7 +38,6 @@
     - terraform init -upgrade -backend-config=.backend.hcl
     - terraform plan -var-file=.tfvars -compact-warnings -out=tfplan
 
-    - tailscale logout
   artifacts:
     name: "plan-${MODULE_NAME}"
     paths:
@@ -57,8 +56,10 @@
     KUBECONFIG: "${KUBECONFIG_FILE}"
     OUTPUT_DIR: "/opt/terraform-outputs"
   before_script:
-    - chmod +x scripts/ci/setup-env.sh
+    - chmod +x scripts/ci/setup-env.sh 
+    - chmod +x scripts/ci/tailscale-setup.sh
     - bash scripts/ci/setup-env.sh
+    - bash scripts/ci/tailscale-setup.sh
 
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
@@ -74,6 +75,8 @@
     - terraform output -json > outputs.json
     - tailscale ssh root@${TAILSCALE_SERVER} -- "mkdir -p ${OUTPUT_DIR}/${MODULE_NAME} && cat > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json" < outputs.json
 
+  after_script:
     - tailscale logout
+
   tags:
     - k8s
