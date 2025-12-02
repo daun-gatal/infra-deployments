@@ -16,3 +16,6 @@ database_apply:
   extends: .apply_template
   variables:
     MODULE_NAME: "database"
+  needs:
+    - job: database_plan
+      artifacts: true
