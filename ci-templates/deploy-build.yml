@@ -56,7 +56,8 @@
     KUBECONFIG: "${KUBECONFIG_FILE}"
     OUTPUT_DIR: "/opt/terraform-outputs"
   before_script:
-    - chmod +x scripts/ci/setup-env.sh && chmod +x scripts/ci/tailscale-setup.sh
+    - chmod +x scripts/ci/setup-env.sh 
+    - chmod +x scripts/ci/tailscale-setup.sh
     - bash scripts/ci/setup-env.sh
     - bash scripts/ci/tailscale-setup.sh
 
