@@ -13,25 +13,21 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  config_path = ""
 }
 
 provider "helm" {
   kubernetes = {
-    config_path = "~/.kube/config"
+    config_path = ""
   }
-}
-
-locals {
-  db = jsondecode(file(var.db_credentials_path))
 }
 
 module "metabase" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/metabase?ref=main"
 
-  metabase_db_password = local.db.postgres_password.value
-  metabase_db_user     = local.db.postgres_username.value
-  metabase_db_host     = local.db.postgres_rw_dns.value
+  metabase_db_password = var.db_password
+  metabase_db_user     = var.db_user
+  metabase_db_host     = var.db_internal_dns
   metabase_db_port     = 5432
   metabase_db_name     = "metabase"
   tailscale_expose     = true
