@@ -16,6 +16,3 @@ airflow_apply:
   extends: .apply_template
   variables:
     MODULE_NAME: "airflow"
-  needs:
-    - job: airflow_plan
-      artifacts: true
