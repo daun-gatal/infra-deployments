@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Required environment variables (from GitLab CI)
-: "${CI_JOB_TOKEN:?CI_JOB_TOKEN is required}"
+: "${GITLAB_TOKEN:?GITLAB_TOKEN is required}"
 : "${CI_API_V4_URL:?CI_API_V4_URL is required}"
 : "${CI_PROJECT_ID:?CI_PROJECT_ID is required}"
 : "${CI_COMMIT_SHA:?CI_COMMIT_SHA is required}"
@@ -15,7 +15,7 @@ JOB_NAME="${MODULE_NAME}_plan"
 echo "🔍 Finding MR associated with merge commit: ${CI_COMMIT_SHA}"
 
 # Get the MR that was merged
-MR_RESPONSE=$(curl --silent --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+MR_RESPONSE=$(curl --silent --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/commits/${CI_COMMIT_SHA}/merge_requests")
 
 MR_IID=$(echo "${MR_RESPONSE}" | jq -r '.[0].iid')
@@ -28,7 +28,7 @@ fi
 echo "✅ Found MR: !${MR_IID}"
 
 # Get pipelines from the MR
-PIPELINES_RESPONSE=$(curl --silent --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+PIPELINES_RESPONSE=$(curl --silent --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${MR_IID}/pipelines")
 
 PIPELINE_ID=$(echo "${PIPELINES_RESPONSE}" | jq -r '[.[] | select(.status == "success")] | .[0].id')
@@ -44,28 +44,43 @@ fi
 
 echo "✅ Found Pipeline ID: ${PIPELINE_ID}"
 
-# Get job ID from the pipeline
-JOBS_RESPONSE=$(curl --silent --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+# Get job details from the pipeline
+JOBS_RESPONSE=$(curl --silent --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/pipelines/${PIPELINE_ID}/jobs")
 
-JOB_ID=$(echo "${JOBS_RESPONSE}" | jq -r --arg job "${JOB_NAME}" '.[] | select(.name == $job) | .id')
+# Find the specific job
+JOB_INFO=$(echo "${JOBS_RESPONSE}" | jq -r --arg job "${JOB_NAME}" '.[] | select(.name == $job)')
 
-if [ -z "${JOB_ID}" ] || [ "${JOB_ID}" == "null" ]; then
+if [ -z "${JOB_INFO}" ] || [ "${JOB_INFO}" == "null" ]; then
   echo "❌ Could not find job '${JOB_NAME}' in pipeline ${PIPELINE_ID}"
   echo "Available jobs:"
-  echo "${JOBS_RESPONSE}" | jq -r '.[].name'
+  echo "${JOBS_RESPONSE}" | jq -r '.[] | "  - \(.name) (\(.status))"'
   exit 1
 fi
 
-echo "✅ Found Job ID: ${JOB_ID}"
+JOB_ID=$(echo "${JOB_INFO}" | jq -r '.id')
+JOB_STATUS=$(echo "${JOB_INFO}" | jq -r '.status')
+ARTIFACTS_FILE=$(echo "${JOB_INFO}" | jq -r '.artifacts_file.filename // "none"')
+ARTIFACTS_EXPIRE=$(echo "${JOB_INFO}" | jq -r '.artifacts_expire_at // "never"')
 
-# Download full artifacts archive
+echo "✅ Found Job ID: ${JOB_ID}"
+echo "   Status: ${JOB_STATUS}"
+echo "   Artifacts: ${ARTIFACTS_FILE}"
+echo "   Expires: ${ARTIFACTS_EXPIRE}"
+
+# Check if artifacts exist
+if [ "${ARTIFACTS_FILE}" == "none" ] || [ "${ARTIFACTS_FILE}" == "null" ]; then
+  echo "❌ Job has NO artifacts (expired or not produced)"
+  exit 1
+fi
+
+# Download artifacts
 OUTPUT_FILE="plan-${MODULE_NAME}.zip"
 
 echo "📦 Downloading artifacts from job ${JOB_ID}..."
 
 HTTP_CODE=$(curl --silent --location --output "${OUTPUT_FILE}" --write-out "%{http_code}" \
-  --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+  --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
   "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/jobs/${JOB_ID}/artifacts")
 
 if [ "${HTTP_CODE}" != "200" ]; then
@@ -80,7 +95,7 @@ echo "✅ Downloaded: ${OUTPUT_FILE}"
 unzip -o "${OUTPUT_FILE}"
 rm -f "${OUTPUT_FILE}"
 
-# Verify required files exist
+# Verify required files
 REQUIRED_FILES=(
   "${MODULE_NAME}/tfplan"
   "${MODULE_NAME}/.backend.hcl"
@@ -95,7 +110,6 @@ for FILE in "${REQUIRED_FILES[@]}"; do
   echo "✅ Found: ${FILE}"
 done
 
-# Verify providers directory
 if [ ! -d "${MODULE_NAME}/.terraform/providers" ]; then
   echo "❌ Missing: ${MODULE_NAME}/.terraform/providers"
   exit 1
