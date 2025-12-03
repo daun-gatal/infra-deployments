@@ -3,7 +3,7 @@ set -e
 
 echo "📦 Installing required packages…"
 apt-get update
-apt-get install -y curl openssh-client gettext-base gnupg software-properties-common wget
+apt-get install -y curl openssh-client gettext-base gnupg software-properties-common wget unzip jq
 
 echo "🔐 Setting up SSH for Git cloning…"
 mkdir -p ~/.ssh
