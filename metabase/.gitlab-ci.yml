@@ -16,7 +16,5 @@ metabase_apply:
   extends: .apply_template
   variables:
     MODULE_NAME: "metabase"
-  needs:
-    - job: metabase_plan
-      artifacts: true
+
     
