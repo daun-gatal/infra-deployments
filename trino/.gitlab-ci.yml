@@ -16,7 +16,5 @@ trino_apply:
   extends: .apply_template
   variables:
     MODULE_NAME: "trino"
-  needs:
-    - job: trino_plan
-      artifacts: true
+
     

@@ -16,6 +16,3 @@ kafka_apply:
   extends: .apply_template
   variables:
     MODULE_NAME: "kafka"
-  needs:
-    - job: kafka_plan
-      artifacts: true

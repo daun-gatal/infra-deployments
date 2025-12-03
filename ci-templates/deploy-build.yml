@@ -11,7 +11,7 @@
     - bash scripts/ci/setup-env.sh
 
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
       changes:
         - "${MODULE_NAME}/main.tf"
       when: always
@@ -58,6 +58,7 @@
   before_script:
     - chmod +x scripts/ci/setup-env.sh 
     - chmod +x scripts/ci/tailscale-setup.sh
+    - chmod +x scripts/ci/download-mr-artifacts.sh
     - bash scripts/ci/setup-env.sh
     - bash scripts/ci/tailscale-setup.sh
 
@@ -69,6 +70,7 @@
     - when: never
 
   script:
+    - bash scripts/ci/download-mr-artifacts.sh
     - cd ${MODULE_NAME}
     - terraform init -backend-config=.backend.hcl
     - terraform apply -auto-approve -compact-warnings tfplan
