@@ -59,7 +59,7 @@ module "schema_registry" {
   depends_on = [ module.node_controller, module.node_broker, module.cluster ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/schema-registry?ref=main"
 
-  kafka_bootstrap_servers = ["PLAINTEXT://${module.kafka_cluster.kafka_int_bootstrap_servers}"]
+  kafka_bootstrap_servers = ["PLAINTEXT://${module.cluster.kafka_int_bootstrap_servers}"]
   tailscale_expose = false
 }
 
@@ -69,7 +69,7 @@ module "connect" {
 
   tailscale_expose = false
   kafka_connect_image = "registry.gitlab.com/daun-gatal/image-repo/cp-kafka-connect:8.0.1"
-  kafka_bootstrap_servers = [module.kafka_cluster.kafka_int_bootstrap_servers]
+  kafka_bootstrap_servers = [module.cluster.kafka_int_bootstrap_servers]
   schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
 }
 
@@ -77,7 +77,7 @@ module "ksqldb" {
   depends_on = [ module.node_controller, module.node_broker, module.cluster, module.schema_registry ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ksqldb?ref=main"
 
-  kafka_bootstrap_servers = ["PLAINTEXT://${module.kafka_cluster.kafka_int_bootstrap_servers}"]
+  kafka_bootstrap_servers = ["PLAINTEXT://${module.cluster.kafka_int_bootstrap_servers}"]
   kafka_schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
   tailscale_expose = false
 }
