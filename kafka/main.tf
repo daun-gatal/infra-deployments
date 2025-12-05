@@ -71,7 +71,7 @@ module "connect" {
   kafka_connect_image = "registry.gitlab.com/daun-gatal/image-repo/cp-kafka-connect:8.0.1"
   kafka_bootstrap_servers = [module.cluster.kafka_int_bootstrap_servers]
   schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
-  kafka_connect_replicas = 3
+  kafka_connect_replicas = 1
   kafka_connect_resources_config = {
     limits = {
       cpu    = "3"
