@@ -66,20 +66,28 @@ module "schema_registry" {
 module "connect" {
   depends_on = [ module.node_controller, module.node_broker, module.cluster, module.schema_registry ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/connect?ref=main"
-
-  tailscale_expose = false
-  kafka_connect_image = "registry.gitlab.com/daun-gatal/image-repo/cp-kafka-connect:8.0.1"
-  kafka_bootstrap_servers = [module.cluster.kafka_int_bootstrap_servers]
-  schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
-  kafka_connect_replicas = 1
-  kafka_connect_resources_config = {
-    limits = {
-      cpu    = "3"
-      memory = "6Gi"
-    }
-    requests = {
-      cpu    = "250m"
-      memory = "512Mi"
+  
+  kafka_connect_instances = {
+    connect = {
+      replicas = 1
+      image = "registry.gitlab.com/daun-gatal/image-repo/cp-kafka-connect:8.0.1"
+      kafka_connect_name = "kafka-connect"
+      kafka_bootstrap_servers = [module.cluster.kafka_int_bootstrap_servers]
+      schema_registry_url = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
+      tailscale_expose = false
+      connect_config_storage_replication_factor = 1
+      connect_offset_storage_replication_factor = 1
+      connect_status_storage_replication_factor = 1
+      resources = {
+        limits = {
+          cpu    = "3"
+          memory = "6Gi"
+        }
+        requests = {
+          cpu    = "250m"
+          memory = "512Mi"
+        }
+      }
     }
   }
 }
@@ -113,7 +121,7 @@ output "kafka_schema_registry_url" {
 
 output "kafka_connect_url" {
   description = "Kafka Connect URL for client application"
-  value = "http://${module.connect.kafka_connect_internal_dns}:${module.connect.kafka_connect_port}"
+  value = module.connect.kafka_connect_endpoints
 }
 
 output "kafka_ksqldb_url" {
