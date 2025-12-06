@@ -22,14 +22,31 @@ provider "helm" {
   }
 }
 
-module "minio" {
+module "rustfs" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/rustfs?ref=main"
 
   tailscale_expose = true
-  service_annotations = {
-    "tailscale.com/expose" = "true"
-    "tailscale.com/hostname" = "rustfs-int"
+  deployment_type = "statefulset"
+  replica_count = 4
+
+  values = {
+    consoleService = {
+      enabled = true
+    }
+
+    dataPersistence = {
+      enabled = true
+      storageClass = "standard"
+      size = "12Gi"
+    }
+
+    logsPersistence = {
+      enabled = false
+      storageClass = "standard"
+      size = "5Gi"
+    }
   }
+
   resources = {
     limits = {
       cpu    = "1"
