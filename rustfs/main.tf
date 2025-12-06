@@ -25,6 +25,7 @@ provider "helm" {
 module "minio" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/rustfs?ref=main"
 
+  tailscale_expose = true
   service_annotations = {
     "tailscale.com/expose" = "true"
     "tailscale.com/hostname" = "rustfs-int"
@@ -39,5 +40,4 @@ module "minio" {
       memory = "256Mi"
     }
   }
-
 }
