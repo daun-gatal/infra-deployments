@@ -11,6 +11,7 @@ include:
   - local: 'metabase/.gitlab-ci.yml'
   - local: 'airflow/.gitlab-ci.yml'
   - local: 'openbao/.gitlab-ci.yml'
+  - local: 'rustfs/.gitlab-ci.yml'
 
 dummy_job:
   stage: dummy
