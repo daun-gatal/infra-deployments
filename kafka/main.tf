@@ -150,4 +150,4 @@ output "kafka_ksqldb_url" {
   description = "KSQLDB URL for client application"
   value = "http://${module.ksqldb.ksqldb_internal_dns}:${module.ksqldb.ksqldb_port}"
 }
-# add comments v19
+# add comments v20
