@@ -67,6 +67,14 @@ module "airflow" {
   airflow_triggerer_replicas = 1
 
   values = {
+    securityContexts = {
+      pod = {
+        runAsUser = 50000
+        fsGroup = 0
+        runAsGroup = 0
+      }
+    }
+
     workers = {
       persistence = {
         enabled = true
