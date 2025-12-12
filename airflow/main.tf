@@ -32,6 +32,7 @@ module "airflow" {
   # Executor configuration
   airflow_executor = "CeleryExecutor"
   enable_log_groomer_sidecar = true
+  airflow_log_retention_days = 3
   
   # Connect to PostgreSQL for metadata
   airflow_metadata_db_conn = "postgresql://${var.db_user}:${var.db_password}@${var.db_internal_dns}:5432/airflow"
