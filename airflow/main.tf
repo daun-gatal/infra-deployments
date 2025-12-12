@@ -22,12 +22,13 @@ provider "helm" {
   }
 }
 
-module "airflow_v2" {
+module "airflow" {
   source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/airflow?ref=main"
   
   
   image_repository = "registry.gitlab.com/daun-gatal/image-repo/airflow"
   image_tag = "3.1.1"
+  namespace = "airflow-v3"
   
   # Executor configuration
   airflow_executor = "CeleryExecutor"
