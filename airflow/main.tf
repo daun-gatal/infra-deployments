@@ -93,7 +93,7 @@ module "airflow" {
 
     logs = {
       persistence = {
-        enabled = true
+        enabled = false
         size = "10Gi"
         storageClassName = "standard"
       }
