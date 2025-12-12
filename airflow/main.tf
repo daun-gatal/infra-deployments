@@ -22,7 +22,7 @@ provider "helm" {
   }
 }
 
-module "airflow" {
+module "airflow_v2" {
   source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/airflow?ref=main"
   
   
@@ -80,6 +80,7 @@ module "airflow" {
         enabled = true
         size = "10Gi"
         storageClassName = "standard"
+        fixPermissions = true
       }
     }
 
@@ -88,6 +89,7 @@ module "airflow" {
         enabled = true
         size = "10Gi"
         storageClassName = "standard"
+        fixPermissions = true
       }
     }
 
