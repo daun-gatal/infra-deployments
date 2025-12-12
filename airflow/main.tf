@@ -31,6 +31,8 @@ module "airflow" {
   
   # Executor configuration
   airflow_executor = "CeleryExecutor"
+  enable_log_groomer_sidecar = true
+  airflow_log_retention_days = 3
   
   # Connect to PostgreSQL for metadata
   airflow_metadata_db_conn = "postgresql://${var.db_user}:${var.db_password}@${var.db_internal_dns}:5432/airflow"
@@ -60,6 +62,35 @@ module "airflow" {
   airflow_worker_keda_max_replicas = 2
 
   tailscale_expose = true
+
+  airflow_enable_triggerer = true
+  airflow_triggerer_replicas = 1
+
+  values = {
+    workers = {
+      persistence = {
+        enabled = true
+        size = "10Gi"
+        storageClassName = "standard"
+      }
+    }
+
+    triggerer = {
+      persistence = {
+        enabled = true
+        size = "10Gi"
+        storageClassName = "standard"
+      }
+    }
+
+    logs = {
+      persistence = {
+        enabled = true
+        size = "10Gi"
+        storageClassName = "standard"
+      }
+    }
+  }
 }
 
 # Add comments here if needed v5
