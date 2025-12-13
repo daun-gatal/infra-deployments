@@ -65,9 +65,7 @@ module "superset" {
         }
     }
     envFromSecret = "superset-custom-secret"
-    configOverrides = {
-      enable_oauth = local.github_oauth_config
-    }
+    oauth_config = local.github_oauth_config
   }
 }
 
