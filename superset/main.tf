@@ -42,7 +42,8 @@ module "superset" {
   enable_celery_worker = true
   enable_celery_beat   = true
 
-  tailscale_expose = true
+  tailscale_expose = false
+  tailscale_funnel = true
   superset_port = 80
 
   bootstrap_pip_packages = ["trino"]
