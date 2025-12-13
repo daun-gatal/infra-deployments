@@ -67,6 +67,7 @@ module "superset" {
         }
     }
     envFromSecret = "superset-custom-secret"
+    configOverrides = local.github_oauth_config
   }
 }
 
