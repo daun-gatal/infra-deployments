@@ -1,5 +1,4 @@
 from flask_appbuilder.security.manager import AUTH_OAUTH
-import os
 
 AUTH_TYPE = AUTH_OAUTH
 
