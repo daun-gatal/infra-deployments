@@ -35,10 +35,8 @@ locals {
 module "superset" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/superset?ref=main"
 
-  superset_secret_key = var.superset_secret_key
   admin_password      = var.admin_password
   use_external_database = true
-  database_uri       = "postgresql://${var.db_user}:${var.db_password}@${var.db_internal_dns}:5432/superset"
 
   enable_celery_worker = true
   enable_celery_beat   = true
