@@ -66,20 +66,10 @@ module "superset" {
             targetMemoryUtilizationPercentage = 90
         }
     }
-    service = {
-        port = 80
-    }
     envFromSecret = "superset-custom-secret"
-    extraEnvRaw = [
-        {
-            name = "GITHUB_CLIENT_ID"
-            value = var.github_client_id
-        },
-        {
-            name = "GITHUB_CLIENT_SECRET"
-            value = var.github_client_secret
-        }
-    ]
+    configOverrides = {
+      enable_oauth = local.github_oauth_config
+    }
   }
 }
 
