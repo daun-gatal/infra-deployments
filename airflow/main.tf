@@ -28,7 +28,7 @@ module "airflow" {
   
   image_repository = "registry.gitlab.com/daun-gatal/image-repo/airflow"
   image_tag = "3.1.1"
-  namespace = "airflow-v3"
+  namespace = "airflow"
   
   # Executor configuration
   airflow_executor = "CeleryExecutor"
@@ -81,8 +81,21 @@ module "airflow" {
         enabled = true
         size = "10Gi"
         storageClassName = "standard"
-        fixPermissions = true
+        fixPermissions = false
       }
+      extraInitContainers = [
+        {
+          name = "init-chown-logs"
+          image = "busybox/stable"
+          command = ["sh", "-c", "chown -R 50000: /opt/airflow/logs"]
+          volumeMounts = [
+            {
+              name = "logs"
+              mountPath = "/opt/airflow/logs"
+            }
+          ]
+        }
+      ]
     }
 
     triggerer = {
@@ -90,8 +103,21 @@ module "airflow" {
         enabled = true
         size = "10Gi"
         storageClassName = "standard"
-        fixPermissions = true
+        fixPermissions = false
       }
+      extraInitContainers = [
+        {
+          name = "init-chown-logs"
+          image = "busybox/stable"
+          command = ["sh", "-c", "chown -R 50000: /opt/airflow/logs"]
+          volumeMounts = [
+            {
+              name = "logs"
+              mountPath = "/opt/airflow/logs"
+            }
+          ]
+        }
+      ]
     }
 
     logs = {
