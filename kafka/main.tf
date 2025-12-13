@@ -128,7 +128,8 @@ module "ui" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ui?ref=main"
   
   kafka_ui_version = "main"
-  tailscale_expose = true
+  tailscale_expose = false
+  tailscale_funnel = true
 }
 
 output "kafka_int_bootstrap_servers" {
