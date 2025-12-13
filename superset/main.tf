@@ -69,6 +69,7 @@ module "superset" {
     service = {
         port = 80
     }
+    envFromSecret = "superset-custom-secret"
     extraEnvRaw = [
         {
             name = "GITHUB_CLIENT_ID"
