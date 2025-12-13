@@ -1,0 +1,18 @@
+include:
+  - local: 'ci-templates/deploy-build.yml'
+
+# ==========================================================
+# Terraform PLAN for Superset Module
+# ==========================================================
+superset_plan:
+  extends: .plan_template
+  variables:
+    MODULE_NAME: "superset"
+
+# ==========================================================
+# Terraform APPLY for Superset Module
+# ==========================================================
+superset_apply:
+  extends: .apply_template
+  variables:
+    MODULE_NAME: "superset"
