@@ -1,5 +1,8 @@
 from flask_appbuilder.security.manager import AUTH_OAUTH
 
+ENABLE_PROXY_FIX = True
+PREFERRED_URL_SCHEME = "https"
+
 AUTH_TYPE = AUTH_OAUTH
 
 OAUTH_PROVIDERS = [
