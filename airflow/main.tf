@@ -71,8 +71,8 @@ module "airflow" {
     securityContexts = {
       pod = {
         runAsUser = 50000
-        fsGroup = 0
-        runAsGroup = 0
+        fsGroup = 50000
+        runAsGroup = 50000
       }
     }
 
@@ -83,19 +83,6 @@ module "airflow" {
         storageClassName = "standard"
         fixPermissions = false
       }
-      extraInitContainers = [
-        {
-          name = "init-chown-logs"
-          image = "busybox:stable"
-          command = ["sh", "-c", "chown -R 50000: /opt/airflow/logs"]
-          volumeMounts = [
-            {
-              name = "logs"
-              mountPath = "/opt/airflow/logs"
-            }
-          ]
-        }
-      ]
     }
 
     triggerer = {
@@ -105,19 +92,6 @@ module "airflow" {
         storageClassName = "standard"
         fixPermissions = false
       }
-      extraInitContainers = [
-        {
-          name = "init-chown-logs"
-          image = "busybox:stable"
-          command = ["sh", "-c", "chown -R 50000: /opt/airflow/logs"]
-          volumeMounts = [
-            {
-              name = "logs"
-              mountPath = "/opt/airflow/logs"
-            }
-          ]
-        }
-      ]
     }
 
     logs = {
