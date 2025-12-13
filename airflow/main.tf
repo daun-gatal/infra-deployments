@@ -83,6 +83,19 @@ module "airflow" {
         storageClassName = "standard"
         fixPermissions = false
       }
+      extraInitContainers = [
+        {
+          name = "init-chown-logs"
+          image = "busybox/stable"
+          command = ["sh", "-c", "chown -R 50000: /opt/airflow/logs"]
+          volumeMounts = [
+            {
+              name = "logs"
+              mountPath = "/opt/airflow/logs"
+            }
+          ]
+        }
+      ]
     }
 
     triggerer = {
@@ -92,6 +105,19 @@ module "airflow" {
         storageClassName = "standard"
         fixPermissions = false
       }
+      extraInitContainers = [
+        {
+          name = "init-chown-logs"
+          image = "busybox/stable"
+          command = ["sh", "-c", "chown -R 50000: /opt/airflow/logs"]
+          volumeMounts = [
+            {
+              name = "logs"
+              mountPath = "/opt/airflow/logs"
+            }
+          ]
+        }
+      ]
     }
 
     logs = {
