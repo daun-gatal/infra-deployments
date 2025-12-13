@@ -86,7 +86,7 @@ module "airflow" {
       extraInitContainers = [
         {
           name = "init-chown-logs"
-          image = "busybox/stable"
+          image = "busybox:stable"
           command = ["sh", "-c", "chown -R 50000: /opt/airflow/logs"]
           volumeMounts = [
             {
@@ -108,7 +108,7 @@ module "airflow" {
       extraInitContainers = [
         {
           name = "init-chown-logs"
-          image = "busybox/stable"
+          image = "busybox:stable"
           command = ["sh", "-c", "chown -R 50000: /opt/airflow/logs"]
           volumeMounts = [
             {
