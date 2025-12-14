@@ -12,27 +12,10 @@ airflow (plan):
 # ==========================================================
 # Terraform APPLY for Airflow Module
 # ==========================================================
-airflow (apply):
-  stage: apply
+airflow:
   extends: .apply_template
+  parallel:
+    matrix:
+      - TF_ACTION: [apply, refresh, destroy]
   variables:
-    TF_ACTION: apply
     MODULE_NAME: airflow
-  when: manual
-
-airflow (refresh):
-  stage: apply
-  extends: .apply_template
-  variables:
-    TF_ACTION: refresh
-    MODULE_NAME: airflow
-  when: manual
-
-airflow (destroy):
-  stage: apply
-  extends: .apply_template
-  variables:
-    TF_ACTION: destroy
-    MODULE_NAME: airflow
-  when: manual
-
