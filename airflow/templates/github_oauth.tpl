@@ -3,9 +3,13 @@ from flask_appbuilder.security.manager import AUTH_OAUTH
 import os
 
 AUTH_TYPE = AUTH_OAUTH
-AUTH_USER_REGISTRATION_ROLE = "${auth_user_registration_role}"
+AUTH_ROLE_PUBLIC = "Public"
 AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB to register
+AUTH_ROLES_SYNC_AT_LOGIN = True  # Checks roles on every login
 
+AUTH_USER_ROLES_MAPPING = {
+    "daun-gatal": ["Admin"]
+}
 
 # If you wish, you can add multiple OAuth providers.
 OAUTH_PROVIDERS = [
@@ -26,9 +30,26 @@ OAUTH_PROVIDERS = [
 ]
 
 
-class CustomSecurityManager(FabAirflowSecurityManagerOverride):
-    pass
+def map_roles(user_id: str) -> list[str]:
+    return AUTH_USER_ROLES_MAPPING.get(user_id, [AUTH_ROLE_PUBLIC])
+
+class GithubUserAuthorizer(FabAirflowSecurityManagerOverride):
+    # In this example, the oauth provider == 'github'.
+    # If you ever want to support other providers, see how it is done here:
+    # https://github.com/dpgaspar/Flask-AppBuilder/blob/master/flask_appbuilder/security/manager.py#L550
+    def get_oauth_user_info(self, provider: str, resp: Any) -> dict[str, Union[str, list[str]]]:
+        # Creates the user info payload from GitHub.
+        # The user previously allowed your app to act on their behalf,
+        #   so now we can query the user and teams endpoints for their data.
+        # Username and team membership are added to the payload and returned to FAB.
+
+        remote_app = self.appbuilder.sm.oauth_remotes[provider]
+        me = remote_app.get("user")
+        user_data = me.json()
+        user_id = user_data.get("login")
+        roles = map_roles(user_id)
+        return {"username": "github_" + user_id, "role_keys": roles}
 
 
 # Make sure to replace this with your own implementation of AirflowSecurityManager class
-SECURITY_MANAGER_CLASS = CustomSecurityManager
+SECURITY_MANAGER_CLASS = GithubUserAuthorizer
