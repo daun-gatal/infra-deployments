@@ -103,7 +103,7 @@ module "airflow" {
     }
 
     ingress = {
-      web = {
+      apiServer = {
         enabled = true
         path = "/"
         pathType = "Prefix"
