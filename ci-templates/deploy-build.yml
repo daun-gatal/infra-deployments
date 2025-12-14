@@ -43,6 +43,7 @@
     paths:
     - ${MODULE_NAME}/tfplan
     - ${MODULE_NAME}/.backend.hcl
+    - ${MODULE_NAME}/.tfvars
     - ${MODULE_NAME}/.terraform.lock.hcl
     - ${MODULE_NAME}/.terraform/providers
     expire_in: 1 hour
