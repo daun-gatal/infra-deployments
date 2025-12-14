@@ -4,14 +4,9 @@ import os
 
 AUTH_TYPE = AUTH_OAUTH
 AUTH_USER_REGISTRATION_ROLE = "${auth_user_registration_role}"
-AUTH_ROLES_SYNC_AT_LOGIN = True  # Checks roles on every login
 AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB to register
 
-AUTH_ROLES_MAPPING = {
-    "Viewer": ["Viewer"],
-    "Admin": ["Admin"],
-    "Public": ["Public"]
-}
+
 # If you wish, you can add multiple OAuth providers.
 OAUTH_PROVIDERS = [
     {
