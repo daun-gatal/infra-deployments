@@ -29,11 +29,11 @@ case "${TF_ACTION}" in
     ;;
 
   refresh)
-    terraform apply -refresh-only -auto-approve -compact-warnings 
+    terraform apply -refresh-only -auto-approve -compact-warnings -var-file=.tfvars
     ;;
 
   destroy)
-    terraform destroy -auto-approve -compact-warnings
+    terraform destroy -auto-approve -compact-warnings -var-file=.tfvars
     ;;
 
   *)
