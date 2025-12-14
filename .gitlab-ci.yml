@@ -1,7 +1,7 @@
 stages:
   - dummy
   - plan
-  - apply
+  - execute
 
 include:
   - local: 'database/.gitlab-ci.yml'
