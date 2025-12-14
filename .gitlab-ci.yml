@@ -13,7 +13,7 @@ include:
   - local: 'openbao/.gitlab-ci.yml'
   - local: 'superset/.gitlab-ci.yml'
 
-dummy_job:
+dummy job:
   stage: dummy
   image: ubuntu:22.04
   before_script: []
