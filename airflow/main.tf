@@ -62,7 +62,7 @@ module "airflow" {
   airflow_worker_keda_min_replicas = 1
   airflow_worker_keda_max_replicas = 2
 
-  tailscale_expose = true
+  tailscale_expose = false
 
   airflow_enable_triggerer = true
   airflow_triggerer_replicas = 1
@@ -99,6 +99,26 @@ module "airflow" {
         enabled = false
         size = "10Gi"
         storageClassName = "standard"
+      }
+    }
+
+    ingress = {
+      web = {
+        enabled = true
+        path = "/"
+        pathType = "Prefix"
+        ingressClassName = "tailscale"
+        hosts = [
+          {
+            name = "airflow-web-ext"
+            tls = {
+              enabled = true
+            }
+          }
+        ]
+        annotations = {
+          "tailscale.com/funnel": "true"
+        }
       }
     }
   }
