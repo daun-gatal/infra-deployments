@@ -4,15 +4,15 @@ include:
 # ==========================================================
 # Terraform PLAN for Airflow Module
 # ==========================================================
-airflow_plan:
+airflow (plan):
   extends: .plan_template
   variables:
-    MODULE_NAME: "airflow"
+    MODULE_NAME: airflow
 
 # ==========================================================
 # Terraform APPLY for Airflow Module
 # ==========================================================
-airflow 1/3 (apply):
+airflow (apply):
   stage: apply
   extends: .apply_template
   variables:
@@ -20,7 +20,7 @@ airflow 1/3 (apply):
     MODULE_NAME: airflow
   when: manual
 
-airflow 2/3 (refresh):
+airflow (refresh):
   stage: apply
   extends: .apply_template
   variables:
@@ -28,7 +28,7 @@ airflow 2/3 (refresh):
     MODULE_NAME: airflow
   when: manual
 
-airflow 3/3 (destroy):
+airflow (destroy):
   stage: apply
   extends: .apply_template
   variables:

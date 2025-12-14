@@ -4,15 +4,34 @@ include:
 # ==========================================================
 # Terraform PLAN for Database Module
 # ==========================================================
-database_plan:
+database (plan):
   extends: .plan_template
   variables:
-    MODULE_NAME: "database"
+    MODULE_NAME: database
 
 # ==========================================================
 # Terraform APPLY for Database Module
 # ==========================================================
-database_apply:
+database (apply):
+  stage: apply
   extends: .apply_template
   variables:
-    MODULE_NAME: "database"
+    TF_ACTION: apply
+    MODULE_NAME: database
+  when: manual
+
+database (refresh):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: refresh
+    MODULE_NAME: database
+  when: manual
+
+database (destroy):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: destroy
+    MODULE_NAME: database
+  when: manual

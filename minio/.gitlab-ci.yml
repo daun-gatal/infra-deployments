@@ -4,17 +4,34 @@ include:
 # ==========================================================
 # Terraform PLAN for Minio Module
 # ==========================================================
-minio_plan:
+minio (plan):
   extends: .plan_template
   variables:
-    MODULE_NAME: "minio"
+    MODULE_NAME: minio
 
 # ==========================================================
 # Terraform APPLY for minio Module
 # ==========================================================
-minio_apply:
+minio (apply):
+  stage: apply
   extends: .apply_template
   variables:
-    MODULE_NAME: "minio"
+    TF_ACTION: apply
+    MODULE_NAME: minio
+  when: manual
 
-    
+minio (refresh):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: refresh
+    MODULE_NAME: minio
+  when: manual
+
+minio (destroy):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: destroy
+    MODULE_NAME: minio
+  when: manual
