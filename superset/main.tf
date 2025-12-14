@@ -47,6 +47,8 @@ module "superset" {
   superset_port = 80
 
   bootstrap_pip_packages = ["trino"]
+
+  enable_superset_autoscaling = true
 }
 
 # Add comments here v3
