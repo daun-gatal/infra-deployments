@@ -51,7 +51,7 @@
     - k8s
 
 .apply_template:
-  stage: apply
+  stage: execute
   image: ubuntu:22.04
   variables:
     KUBECONFIG: "${KUBECONFIG_FILE}"
