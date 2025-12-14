@@ -49,7 +49,7 @@
   tags:
     - k8s
 
-.apply_template:
+.terraform_exec_template:
   stage: apply
   image: ubuntu:22.04
   variables:
