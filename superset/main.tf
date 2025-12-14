@@ -47,27 +47,6 @@ module "superset" {
   superset_port = 80
 
   bootstrap_pip_packages = ["trino"]
-
-  values = {
-    supersetNode = {
-        autoscaling = {
-            enabled = true
-            minReplicas = 1
-            maxReplicas = 2
-            targetCPUUtilizationPercentage = 90
-            targetMemoryUtilizationPercentage = 90
-        }
-    }
-    supersetWorker = {
-        autoscaling = {
-            enabled = true
-            minReplicas = 1
-            maxReplicas = 2
-            targetCPUUtilizationPercentage = 90
-            targetMemoryUtilizationPercentage = 90
-        }
-    }
-  }
 }
 
 # Add comments here v3
