@@ -12,26 +12,10 @@ superset (plan):
 # ==========================================================
 # Terraform APPLY for Superset Module
 # ==========================================================
-superset (apply):
-  stage: apply
+superset:
   extends: .apply_template
+  parallel:
+    matrix:
+      - TF_ACTION: [apply, refresh, destroy]
   variables:
-    TF_ACTION: apply
     MODULE_NAME: superset
-  when: manual
-
-superset (refresh):
-  stage: apply
-  extends: .apply_template
-  variables:
-    TF_ACTION: refresh
-    MODULE_NAME: superset
-  when: manual
-
-superset (destroy):
-  stage: apply
-  extends: .apply_template
-  variables:
-    TF_ACTION: destroy
-    MODULE_NAME: superset
-  when: manual

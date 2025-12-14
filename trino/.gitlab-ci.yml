@@ -12,28 +12,11 @@ trino (plan):
 # ==========================================================
 # Terraform APPLY for Trino Module
 # ==========================================================
-trino (apply):
-  stage: apply
+trino:
   extends: .apply_template
+  parallel:
+    matrix:
+      - TF_ACTION: [apply, refresh, destroy]
   variables:
-    TF_ACTION: apply
     MODULE_NAME: trino
-  when: manual
-
-trino (refresh):
-  stage: apply
-  extends: .apply_template
-  variables:
-    TF_ACTION: refresh
-    MODULE_NAME: trino
-  when: manual
-
-trino (destroy):
-  stage: apply
-  extends: .apply_template
-  variables:
-    TF_ACTION: destroy
-    MODULE_NAME: trino
-  when: manual
-
     
