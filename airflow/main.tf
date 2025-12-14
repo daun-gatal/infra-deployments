@@ -76,7 +76,7 @@ module "airflow" {
   airflow_enable_triggerer = true
   airflow_triggerer_replicas = 1
 
-  airflow_webserver_config = local.github_oauth_config
+  airflow_api_server_config = local.github_oauth_config
 
   values = {
     securityContexts = {
