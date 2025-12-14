@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # -------- Defaults (backward compatible) --------
-TF_ACTION="${TF_ACTION:-apply}"
+TF_ACTION="${TF_ACTION:?TF_ACTION is required}"
 MODULE_NAME="${MODULE_NAME:?MODULE_NAME is required}"
 OUTPUT_DIR="${OUTPUT_DIR:-/opt/terraform-outputs}"
 
