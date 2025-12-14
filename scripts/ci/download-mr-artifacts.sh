@@ -10,7 +10,7 @@ set -euo pipefail
 : "${MODULE_NAME:?MODULE_NAME is required}"
 
 # Job naming
-JOB_NAME="${MODULE_NAME}_plan"
+JOB_NAME="${MODULE_NAME} (plan)"
 
 echo "🔍 Finding MR associated with merge commit: ${CI_COMMIT_SHA}"
 
