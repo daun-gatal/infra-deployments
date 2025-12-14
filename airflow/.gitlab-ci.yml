@@ -14,7 +14,7 @@ airflow_plan:
 # ==========================================================
 airflow 1/3 (apply):
   stage: apply
-  extends: .terraform_exec_template
+  extends: .apply_template
   variables:
     TF_ACTION: apply
     MODULE_NAME: airflow
@@ -22,7 +22,7 @@ airflow 1/3 (apply):
 
 airflow 2/3 (refresh):
   stage: apply
-  extends: .terraform_exec_template
+  extends: .apply_template
   variables:
     TF_ACTION: refresh
     MODULE_NAME: airflow
@@ -30,7 +30,7 @@ airflow 2/3 (refresh):
 
 airflow 3/3 (destroy):
   stage: apply
-  extends: .terraform_exec_template
+  extends: .apply_template
   variables:
     TF_ACTION: destroy
     MODULE_NAME: airflow
