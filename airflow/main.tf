@@ -22,6 +22,15 @@ provider "helm" {
   }
 }
 
+locals {
+  github_oauth_config = templatefile(
+    "${path.module}/templates/github_oauth.tpl",
+    {
+      auth_user_registration_role = "Admin"
+    }
+  )
+}
+
 module "airflow" {
   source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/airflow?ref=main"
   
@@ -75,6 +84,13 @@ module "airflow" {
         runAsGroup = 50000
       }
     }
+
+    extraEnvFrom = <<-EOT
+      - secretRef:
+          name: airflow-extraenv-secret
+    EOT
+
+    webserverConfig = local.github_oauth_config
 
     workers = {
       persistence = {
