@@ -4,17 +4,36 @@ include:
 # ==========================================================
 # Terraform PLAN for Trino Module
 # ==========================================================
-trino_plan:
+trino (plan):
   extends: .plan_template
   variables:
-    MODULE_NAME: "trino"
+    MODULE_NAME: trino
 
 # ==========================================================
 # Terraform APPLY for Trino Module
 # ==========================================================
-trino_apply:
+trino (apply):
+  stage: apply
   extends: .apply_template
   variables:
-    MODULE_NAME: "trino"
+    TF_ACTION: apply
+    MODULE_NAME: trino
+  when: manual
+
+trino (refresh):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: refresh
+    MODULE_NAME: trino
+  when: manual
+
+trino (destroy):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: destroy
+    MODULE_NAME: trino
+  when: manual
 
     

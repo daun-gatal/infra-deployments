@@ -4,15 +4,34 @@ include:
 # ==========================================================
 # Terraform PLAN for Superset Module
 # ==========================================================
-superset_plan:
+superset (plan):
   extends: .plan_template
   variables:
-    MODULE_NAME: "superset"
+    MODULE_NAME: superset
 
 # ==========================================================
 # Terraform APPLY for Superset Module
 # ==========================================================
-superset_apply:
+superset (apply):
+  stage: apply
   extends: .apply_template
   variables:
-    MODULE_NAME: "superset"
+    TF_ACTION: apply
+    MODULE_NAME: superset
+  when: manual
+
+superset (refresh):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: refresh
+    MODULE_NAME: superset
+  when: manual
+
+superset (destroy):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: destroy
+    MODULE_NAME: superset
+  when: manual
