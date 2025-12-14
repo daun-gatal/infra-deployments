@@ -76,6 +76,8 @@ module "airflow" {
   airflow_enable_triggerer = true
   airflow_triggerer_replicas = 1
 
+  airflow_webserver_config = local.github_oauth_config
+
   values = {
     securityContexts = {
       pod = {
@@ -89,8 +91,6 @@ module "airflow" {
       - secretRef:
           name: airflow-extraenv-secret
     EOT
-
-    webserverConfig = local.github_oauth_config
 
     workers = {
       persistence = {
