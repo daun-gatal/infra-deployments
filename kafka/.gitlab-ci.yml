@@ -4,15 +4,34 @@ include:
 # ==========================================================
 # Terraform PLAN for Kafka Module
 # ==========================================================
-kafka_plan:
+kafka (plan):
   extends: .plan_template
   variables:
-    MODULE_NAME: "kafka"
+    MODULE_NAME: kafka
 
 # ==========================================================
 # Terraform APPLY for Kafka Module
 # ==========================================================
-kafka_apply:
+kafka (apply):
+  stage: apply
   extends: .apply_template
   variables:
-    MODULE_NAME: "kafka"
+    TF_ACTION: apply
+    MODULE_NAME: kafka
+  when: manual
+
+kafka (refresh):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: refresh
+    MODULE_NAME: kafka
+  when: manual
+
+kafka (destroy):
+  stage: apply
+  extends: .apply_template
+  variables:
+    TF_ACTION: destroy
+    MODULE_NAME: kafka
+  when: manual
