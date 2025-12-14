@@ -1,3 +1,4 @@
+from typing import Any, Union
 from airflow.providers.fab.auth_manager.security_manager.override import FabAirflowSecurityManagerOverride
 from flask_appbuilder.security.manager import AUTH_OAUTH
 import os
