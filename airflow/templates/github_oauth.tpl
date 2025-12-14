@@ -1,28 +1,39 @@
+from airflow.providers.fab.auth_manager.security_manager.override import FabAirflowSecurityManagerOverride
 from flask_appbuilder.security.manager import AUTH_OAUTH
 import os
 
-ENABLE_PROXY_FIX = True
-PREFERRED_URL_SCHEME = "https"
-
 AUTH_TYPE = AUTH_OAUTH
+AUTH_USER_REGISTRATION_ROLE = "${auth_user_registration_role}"
+AUTH_ROLES_SYNC_AT_LOGIN = True  # Checks roles on every login
+AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB to register
 
+AUTH_ROLES_MAPPING = {
+    "Viewer": ["Viewer"],
+    "Admin": ["Admin"],
+    "Public": ["Public"]
+}
+# If you wish, you can add multiple OAuth providers.
 OAUTH_PROVIDERS = [
     {
         "name": "github",
         "icon": "fa-github",
         "token_key": "access_token",
         "remote_app": {
-            "client_id": os.environ.get("GITHUB_CLIENT_ID"),
-            "client_secret": os.environ.get("GITHUB_CLIENT_SECRET"),
-            "api_base_url": "https://api.github.com/",
-            "authorize_url": "https://github.com/login/oauth/authorize",
+            "client_id": os.getenv("GITHUB_CLIENT_ID"),
+            "client_secret": os.getenv("GITHUB_CLIENT_SECRET"),
+            "api_base_url": "https://api.github.com",
+            "client_kwargs": {"scope": "read:user, read:org"},
             "access_token_url": "https://github.com/login/oauth/access_token",
-            "client_kwargs": {
-                "scope": "read:user, read:org"
-            }
-        }
-    }
+            "authorize_url": "https://github.com/login/oauth/authorize",
+            "request_token_url": None,
+        },
+    },
 ]
 
-AUTH_USER_REGISTRATION = True
-AUTH_USER_REGISTRATION_ROLE = "${auth_user_registration_role}"
+
+class CustomSecurityManager(FabAirflowSecurityManagerOverride):
+    pass
+
+
+# Make sure to replace this with your own implementation of AirflowSecurityManager class
+SECURITY_MANAGER_CLASS = CustomSecurityManager
