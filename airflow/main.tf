@@ -25,9 +25,7 @@ provider "helm" {
 locals {
   github_oauth_config = templatefile(
     "${path.module}/templates/github_oauth.tpl",
-    {
-      auth_user_registration_role = "Public"
-    }
+    {}
   )
 }
 
