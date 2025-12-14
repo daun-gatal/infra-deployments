@@ -12,28 +12,12 @@ metabase (plan):
 # ==========================================================
 # Terraform APPLY for Metabase Module
 # ==========================================================
-metabase (apply):
-  stage: apply
+metabase:
   extends: .apply_template
+  parallel:
+    matrix:
+      - TF_ACTION: [apply, refresh, destroy]
   variables:
-    TF_ACTION: apply
     MODULE_NAME: metabase
-  when: manual
-
-metabase (refresh):
-  stage: apply
-  extends: .apply_template
-  variables:
-    TF_ACTION: refresh
-    MODULE_NAME: metabase
-  when: manual
-
-metabase (destroy):
-  stage: apply
-  extends: .apply_template
-  variables:
-    TF_ACTION: destroy
-    MODULE_NAME: metabase
-  when: manual
 
     
