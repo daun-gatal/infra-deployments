@@ -48,7 +48,7 @@ module "superset" {
 
   bootstrap_pip_packages = ["trino"]
 
-  enable_superset_autoscaling = true
+  enable_superset_autoscaling = false
 }
 
 # Add comments here v4
