@@ -12,6 +12,7 @@ include:
   - local: 'airflow/.gitlab-ci.yml'
   - local: 'openbao/.gitlab-ci.yml'
   - local: 'superset/.gitlab-ci.yml'
+  - local: 'airbyte/.gitlab-ci.yml'
 
 dummy job:
   stage: dummy
