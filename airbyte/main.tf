@@ -97,7 +97,7 @@ module "airbyte" {
         }
         extraEnv = [
           {
-            name = MINIO_ENDPOINT
+            name = "MINIO_ENDPOINT"
             valueFrom = {
               secretKeyRef = {
                 name = "airbyte-config-secrets"
