@@ -28,15 +28,6 @@ module "airbyte" {
 
   values = {
     global = {
-      secretName = "airbyte-config-secrets"
-      auth = {
-        instanceAdmin = {
-          firstName = "Airbyte"
-          lastName = "Admin"
-          emailSecretKey = "admin-email"
-          passwordSecretKey = "admin-password"
-        }
-      }
       database = {
         type = "external"
         secretName = "airbyte-config-secrets"
@@ -49,7 +40,9 @@ module "airbyte" {
     }
 
     fullnameOverride = "airbyte"
-    postgresql_enabled = false
+    postgresql = {
+      enabled = false
+    }
 
     server = {
       service = {
