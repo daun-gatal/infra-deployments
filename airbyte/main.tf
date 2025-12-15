@@ -25,6 +25,19 @@ provider "helm" {
 
 module "airbyte" {
   source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/airbyte?ref=main"
+
+  values = {
+    fullnameOverride = "airbyte"
+
+    server = {
+      type = "ClusterIP",
+      port = 80
+      annotations = {
+        "tailscale.com/expose" = "true"
+        "tailscale.com/hostname" = "airbyte-web-int"
+      }
+    }
+  }
 }
 
 # Add comments here if needed v1
