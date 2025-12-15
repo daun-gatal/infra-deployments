@@ -27,14 +27,38 @@ module "airbyte" {
   source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/airbyte?ref=main"
 
   values = {
+    global = {
+      secretName = "airbyte-config-secrets"
+      auth = {
+        instanceAdmin = {
+          firstName = "Airbyte"
+          lastName = "Admin"
+          emailSecretKey = "admin-email"
+          passwordSecretKey = "admin-password"
+        }
+      }
+      database = {
+        type = "external"
+        secretName = "airbyte-config-secrets"
+        host = "postgres-cluster-rw.database.svc.cluster.local"
+        port = 5432
+        name = "airbyte"
+        userSecretKey = "database-user"
+        passwordSecretKey = "database-password"
+      }
+    }
+
     fullnameOverride = "airbyte"
+    postgresql_enabled = false
 
     server = {
-      type = "ClusterIP",
-      port = 80
-      annotations = {
-        "tailscale.com/expose" = "true"
-        "tailscale.com/hostname" = "airbyte-web-int"
+      service = {
+        type = "ClusterIP",
+        port = 80
+        annotations = {
+          "tailscale.com/expose" = "true"
+          "tailscale.com/hostname" = "airbyte-web-int"
+        }
       }
     }
   }
