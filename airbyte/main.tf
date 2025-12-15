@@ -37,11 +37,21 @@ module "airbyte" {
         userSecretKey = "DB_USER"
         passwordSecretKey = "DB_PASS"
       }
+      storage = {
+        secretName = "airbyte-config-secrets"
+        type = "minio"
+      }
     }
 
     fullnameOverride = "airbyte"
+
     postgresql = {
       enabled = false
+    }
+
+    minio = {
+      enabled = false
+      secretName = "airbyte-config-secrets"
     }
 
     server = {
