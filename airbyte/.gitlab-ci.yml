@@ -1,0 +1,21 @@
+include:
+  - local: 'ci-templates/deploy-build.yml'
+
+# ==========================================================
+# Terraform PLAN for Airbyte Module
+# ==========================================================
+airbyte (plan):
+  extends: .plan_template
+  variables:
+    MODULE_NAME: airbyte
+
+# ==========================================================
+# Terraform APPLY for Airbyte Module
+# ==========================================================
+airbyte:
+  extends: .apply_template
+  parallel:
+    matrix:
+      - TF_ACTION: [apply, refresh, destroy]
+  variables:
+    MODULE_NAME: airbyte
