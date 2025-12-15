@@ -34,8 +34,8 @@ module "airbyte" {
         host = "postgres-cluster-rw.database.svc.cluster.local"
         port = 5432
         name = "airbyte"
-        userSecretKey = "database-user"
-        passwordSecretKey = "database-password"
+        userSecretKey = "DB_USER"
+        passwordSecretKey = "DB_PASS"
       }
     }
 
