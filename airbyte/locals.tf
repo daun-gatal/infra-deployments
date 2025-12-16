@@ -78,39 +78,5 @@ locals {
         }
       ]
     }
-
-    ingress = {
-      enabled   = true
-      className = "tailscale"
-      annotations = {
-        "tailscale.com/funnel" = "true"
-      }
-      hosts = [
-        {
-          host = "airbyte-web-ext"
-          http = {
-            paths = [
-              {
-                path     = "/"
-                pathType = "Prefix"
-                backend = {
-                  service = {
-                    name = "${local.release_name}-airbyte-server-svc"
-                    port = {
-                      number = local.airbyte_port
-                    }
-                  }
-                }
-              }
-            ]
-          }
-        }
-      ]
-      tls = [
-        {
-          hosts      = ["airbyte-web-ext"]
-        }
-      ]
-    }
   }
 }
