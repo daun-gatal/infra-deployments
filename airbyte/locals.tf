@@ -117,6 +117,11 @@ locals {
           }
         }
       ]
+      tls = [
+        {
+          hosts      = ["airbyte-web-ext"]
+        }
+      ]
     }
   }
 }
