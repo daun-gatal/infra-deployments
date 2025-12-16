@@ -16,6 +16,6 @@ database:
   extends: .apply_template
   parallel:
     matrix:
-      - TF_ACTION: [apply, refresh, destroy]
+      - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
     MODULE_NAME: database
