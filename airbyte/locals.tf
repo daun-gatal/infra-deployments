@@ -46,17 +46,6 @@ locals {
         secretName = "airbyte-config-secrets"
         type       = "minio"
       }
-      auth = {
-        enabled = true
-        instanceAdmin = {
-          firstName          = "Airbyte"
-          lastName           = "Admin"
-          emailSecretName    = "airbyte-config-secrets"
-          emailSecretKey     = "INSTANCE_ADMIN_EMAIL"
-          passwordSecretName = "airbyte-config-secrets"
-          passwordSecretKey  = "INSTANCE_ADMIN_PASS"
-        }
-      }
     }
 
     postgresql = {
