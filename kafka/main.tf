@@ -55,7 +55,7 @@ module "node_broker" {
   storage_type = "persistent-claim"
 }
 
-module "schema_registry" {
+module "schema_registry_new" {
   depends_on = [ module.node_controller, module.node_broker, module.cluster ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/schema-registry?ref=main"
 
@@ -63,8 +63,8 @@ module "schema_registry" {
   tailscale_expose = false
 }
 
-module "connect" {
-  depends_on = [ module.node_controller, module.node_broker, module.cluster, module.schema_registry ]
+module "connect_new" {
+  depends_on = [ module.node_controller, module.node_broker, module.cluster, module.schema_registry_new ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/connect?ref=main"
   
   kafka_connect_instances = {
@@ -78,16 +78,6 @@ module "connect" {
       connect_config_storage_replication_factor = 1
       connect_offset_storage_replication_factor = 1
       connect_status_storage_replication_factor = 1
-      resources = {
-        limits = {
-          cpu    = "3"
-          memory = "6Gi"
-        }
-        requests = {
-          cpu    = "250m"
-          memory = "512Mi"
-        }
-      }
     }
 
     connect-replica = {
@@ -100,22 +90,12 @@ module "connect" {
       connect_config_storage_replication_factor = 1
       connect_offset_storage_replication_factor = 1
       connect_status_storage_replication_factor = 1
-      resources = {
-        limits = {
-          cpu    = "3"
-          memory = "6Gi"
-        }
-        requests = {
-          cpu    = "250m"
-          memory = "512Mi"
-        }
-      }
     }
   }
 }
 
-module "ksqldb" {
-  depends_on = [ module.node_controller, module.node_broker, module.cluster, module.schema_registry ]
+module "ksqldb_new" {
+  depends_on = [ module.node_controller, module.node_broker, module.cluster, module.schema_registry_new ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ksqldb?ref=main"
 
   kafka_bootstrap_servers = ["PLAINTEXT://${module.cluster.kafka_int_bootstrap_servers}"]
@@ -123,8 +103,8 @@ module "ksqldb" {
   tailscale_expose = false
 }
 
-module "ui" {
-  depends_on = [ module.node_controller, module.node_broker, module.cluster, module.schema_registry, module.ksqldb, module.connect ]
+module "ui_new" {
+  depends_on = [ module.node_controller, module.node_broker, module.cluster, module.schema_registry_new, module.ksqldb_new, module.connect_new ]
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/kafka/ui?ref=main"
   
   kafka_ui_version = "main"
@@ -139,16 +119,16 @@ output "kafka_int_bootstrap_servers" {
 
 output "kafka_schema_registry_url" {
   description = "Schema Registry URL for client applications"
-  value       = "http://${module.schema_registry.schema_registry_internal_dns}:${module.schema_registry.schema_registry_port}"
+  value       = "http://${module.schema_registry_new.schema_registry_internal_dns}:${module.schema_registry_new.schema_registry_port}"
 }
 
 output "kafka_connect_url" {
   description = "Kafka Connect URL for client application"
-  value = module.connect.kafka_connect_endpoints
+  value = module.connect_new.kafka_connect_endpoints
 }
 
 output "kafka_ksqldb_url" {
   description = "KSQLDB URL for client application"
-  value = "http://${module.ksqldb.ksqldb_internal_dns}:${module.ksqldb.ksqldb_port}"
+  value = "http://${module.ksqldb_new.ksqldb_internal_dns}:${module.ksqldb_new.ksqldb_port}"
 }
 # add comments v21
