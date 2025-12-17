@@ -27,7 +27,7 @@ module "openbao" {
 
   tailscale_ui_expose    = true
   generate_unseal_key = false
-  image_tag = "2.5.0-beta20251125"
+  image_tag = "2.4.4"
 
   server_storage_secret_name = "openbao-storage-config"
   server_unseal_secret_name = "openbao-unseal-key"
