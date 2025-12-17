@@ -18,7 +18,7 @@ provider "kubernetes" {
 
 provider "helm" {
   kubernetes = {
-    config_path = " "
+    config_path = ""
   }
 }
 
