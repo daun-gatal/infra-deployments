@@ -41,6 +41,7 @@
     - when: never
 
   script:
+  script:
     - |
       # Use basename (e.g. 'database' from 'deployments/database') to preserve existing state
       STATE_NAME=$(basename ${MODULE_NAME})
