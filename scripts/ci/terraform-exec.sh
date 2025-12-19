@@ -9,9 +9,31 @@ OUTPUT_DIR="${OUTPUT_DIR:-/opt/terraform-outputs}"
 echo "▶ Terraform action: ${TF_ACTION}"
 echo "▶ Module: ${MODULE_NAME}"
 
+# Generate .tfvars explicitly to avoid passing it as artifact
+if [ -f .tf.env ]; then
+  echo "Generating .tfvars from .tf.env..."
+  envsubst < .tf.env > "${MODULE_NAME}/.tfvars"
+else
+  echo "⚠️ .tf.env not found!"
+fi
+
 cd "${MODULE_NAME}"
 
 # -------- Init --------
+if [ ! -f .backend.hcl ]; then
+  echo "Generating .backend.hcl..."
+  cat > .backend.hcl <<EOF
+address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}"
+lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
+unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
+lock_method     = "POST"
+unlock_method   = "DELETE"
+retry_wait_min  = 5
+username        = "${GITLAB_USERNAME}"
+password        = "${GITLAB_TOKEN}"
+EOF
+fi
+
 terraform init -backend-config=.backend.hcl
 
 # -------- Helper function for apply outputs --------

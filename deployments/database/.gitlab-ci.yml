@@ -2,12 +2,21 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
+# Terraform VALIDATE for Database Module
+# ==========================================================
+database (validate):
+  extends: .validate_template
+  variables:
+    MODULE_NAME: deployments/database
+
+# ==========================================================
 # Terraform PLAN for Database Module
 # ==========================================================
 database (plan):
   extends: .plan_template
+  needs: ["database (validate)"]
   variables:
-    MODULE_NAME: database
+    MODULE_NAME: deployments/database
 
 # ==========================================================
 # Terraform APPLY for Database Module
@@ -18,4 +27,4 @@ database:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: database
+    MODULE_NAME: deployments/database

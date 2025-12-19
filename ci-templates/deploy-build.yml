@@ -1,10 +1,32 @@
+.validate_template:
+  stage: validate
+  image: $CI_REGISTRY_IMAGE/terraform-runner:latest
+  before_script:
+    - chmod +x scripts/ci/setup-env.sh
+    - bash scripts/ci/setup-env.sh
+    - terraform --version
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      changes:
+        - "${MODULE_NAME}/**/*"
+  script:
+    - cd ${MODULE_NAME}
+    # Initialize without backend to avoid lock/auth errors during validation
+    - terraform init -backend=false -input=false
+    - terraform validate
+    - echo "🔍 Running TFLint..."
+    # Use the root .tflint.hcl config
+    - tflint --config=../../.tflint.hcl
+    - echo "🛡️ Running Trivy..."
+    - trivy config . --severity HIGH,CRITICAL --exit-code 0
+  tags:
+    - k8s
+
 .plan_template:
   stage: plan
-  image: ubuntu:22.04
+  image: $CI_REGISTRY_IMAGE/terraform-runner:latest
   variables:
     KUBECONFIG: "${KUBECONFIG_FILE}"
-    DB_OUTPUT_DIR: "database"
-    MINIO_OUTPUT_DIR: "minio"
 
   before_script:
     - chmod +x scripts/ci/setup-env.sh
@@ -18,11 +40,16 @@
     - when: never
 
   script:
+  script:
     - |
+      # Use basename (e.g. 'database' from 'deployments/database') to preserve existing state
+      STATE_NAME=$(basename ${MODULE_NAME})
+      echo "ℹ️  Using state name: ${STATE_NAME}"
+
       cat > ${MODULE_NAME}/.backend.hcl <<EOF
-      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}"
-      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
-      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
+      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
+      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}/lock"
+      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}/lock"
       lock_method     = "POST"
       unlock_method   = "DELETE"
       retry_wait_min  = 5
@@ -42,8 +69,6 @@
     name: "plan-${MODULE_NAME}"
     paths:
     - ${MODULE_NAME}/tfplan
-    - ${MODULE_NAME}/.backend.hcl
-    - ${MODULE_NAME}/.tfvars
     - ${MODULE_NAME}/.terraform.lock.hcl
     - ${MODULE_NAME}/.terraform/providers
     expire_in: 1 hour
@@ -52,7 +77,7 @@
 
 .apply_template:
   stage: execute
-  image: ubuntu:22.04
+  image: $CI_REGISTRY_IMAGE/terraform-runner:latest
   variables:
     KUBECONFIG: "${KUBECONFIG_FILE}"
     OUTPUT_DIR: "/opt/terraform-outputs"
@@ -67,6 +92,10 @@
     - bash scripts/ci/download-mr-artifacts.sh
 
   rules:
+    # 🚫 BLOCK DESTROY unless explicitly enabled in GitLab UI
+    - if: '$TF_ACTION == "destroy" && $DESTROY_ENABLED != "true"'
+      when: never
+      
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
         - "${MODULE_NAME}/main.tf"  

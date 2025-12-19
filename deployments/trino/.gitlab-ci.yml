@@ -2,20 +2,30 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
-# Terraform PLAN for Kafka Module
+# Terraform VALIDATE for Trino Module
 # ==========================================================
-kafka (plan):
-  extends: .plan_template
+trino (validate):
+  extends: .validate_template
   variables:
-    MODULE_NAME: kafka
+    MODULE_NAME: deployments/trino
 
 # ==========================================================
-# Terraform APPLY for Kafka Module
+# Terraform PLAN for Trino Module
 # ==========================================================
-kafka:
+trino (plan):
+  extends: .plan_template
+  needs: ["trino (validate)"]
+  variables:
+    MODULE_NAME: deployments/trino
+
+# ==========================================================
+# Terraform APPLY for Trino Module
+# ==========================================================
+trino:
   extends: .apply_template
   parallel:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: kafka
+    MODULE_NAME: deployments/trino
+    
