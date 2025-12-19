@@ -22,10 +22,11 @@ cd "${MODULE_NAME}"
 # -------- Init --------
 if [ ! -f .backend.hcl ]; then
   echo "Generating .backend.hcl..."
+  STATE_NAME=$(basename ${MODULE_NAME})
   cat > .backend.hcl <<EOF
-address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}"
-lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
-unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
+address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
+lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}/lock"
+unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}/lock"
 lock_method     = "POST"
 unlock_method   = "DELETE"
 retry_wait_min  = 5
