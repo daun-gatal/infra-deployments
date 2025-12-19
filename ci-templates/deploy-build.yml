@@ -65,7 +65,6 @@
     - terraform plan -var-file=.tfvars -compact-warnings -out=tfplan
 
   artifacts:
-    name: "plan-${MODULE_NAME}"
     paths:
     - ${MODULE_NAME}/tfplan
     - ${MODULE_NAME}/.terraform.lock.hcl
