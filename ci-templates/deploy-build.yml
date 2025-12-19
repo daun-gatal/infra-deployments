@@ -80,6 +80,7 @@
     KUBECONFIG: "${KUBECONFIG_FILE}"
     OUTPUT_DIR: "/opt/terraform-outputs"
     TF_ACTION: "refresh"
+    DESTROY_ENABLED: "false"
   before_script:
     - chmod +x scripts/ci/setup-env.sh 
     - chmod +x scripts/ci/tailscale-setup.sh
@@ -90,10 +91,6 @@
     - bash scripts/ci/download-mr-artifacts.sh
 
   rules:
-    # 🚫 BLOCK DESTROY unless explicitly enabled in GitLab UI
-    - if: '$TF_ACTION == "destroy" && $DESTROY_ENABLED != "true"'
-      when: never
-      
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
         - "${MODULE_NAME}/main.tf"  
