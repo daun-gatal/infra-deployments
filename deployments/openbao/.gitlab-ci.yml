@@ -2,12 +2,21 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
+# Terraform VALIDATE for Openbao Module
+# ==========================================================
+openbao (validate):
+  extends: .validate_template
+  variables:
+    MODULE_NAME: deployments/openbao
+
+# ==========================================================
 # Terraform PLAN for Openbao Module
 # ==========================================================
 openbao (plan):
   extends: .plan_template
+  needs: ["openbao (validate)"]
   variables:
-    MODULE_NAME: openbao
+    MODULE_NAME: deployments/openbao
 
 # ==========================================================
 # Terraform APPLY for Openbao Module
@@ -18,4 +27,4 @@ openbao:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: openbao
+    MODULE_NAME: deployments/openbao

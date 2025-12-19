@@ -2,12 +2,21 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
+# Terraform VALIDATE for Airbyte Module
+# ==========================================================
+airbyte (validate):
+  extends: .validate_template
+  variables:
+    MODULE_NAME: deployments/airbyte
+
+# ==========================================================
 # Terraform PLAN for Airbyte Module
 # ==========================================================
 airbyte (plan):
   extends: .plan_template
+  needs: ["airbyte (validate)"]
   variables:
-    MODULE_NAME: airbyte
+    MODULE_NAME: deployments/airbyte
 
 # ==========================================================
 # Terraform APPLY for Airbyte Module
@@ -18,4 +27,4 @@ airbyte:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: airbyte
+    MODULE_NAME: deployments/airbyte

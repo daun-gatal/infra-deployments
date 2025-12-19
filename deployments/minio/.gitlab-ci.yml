@@ -2,20 +2,29 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
-# Terraform PLAN for Airflow Module
+# Terraform VALIDATE for Minio Module
 # ==========================================================
-airflow (plan):
-  extends: .plan_template
+minio (validate):
+  extends: .validate_template
   variables:
-    MODULE_NAME: airflow
+    MODULE_NAME: deployments/minio
 
 # ==========================================================
-# Terraform APPLY for Airflow Module
+# Terraform PLAN for Minio Module
 # ==========================================================
-airflow:
+minio (plan):
+  extends: .plan_template
+  needs: ["minio (validate)"]
+  variables:
+    MODULE_NAME: deployments/minio
+
+# ==========================================================
+# Terraform APPLY for minio Module
+# ==========================================================
+minio:
   extends: .apply_template
   parallel:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: airflow
+    MODULE_NAME: deployments/minio

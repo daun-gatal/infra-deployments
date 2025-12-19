@@ -2,20 +2,29 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
-# Terraform PLAN for Minio Module
+# Terraform VALIDATE for Kafka Module
 # ==========================================================
-minio (plan):
-  extends: .plan_template
+kafka (validate):
+  extends: .validate_template
   variables:
-    MODULE_NAME: minio
+    MODULE_NAME: deployments/kafka
 
 # ==========================================================
-# Terraform APPLY for minio Module
+# Terraform PLAN for Kafka Module
 # ==========================================================
-minio:
+kafka (plan):
+  extends: .plan_template
+  needs: ["kafka (validate)"]
+  variables:
+    MODULE_NAME: deployments/kafka
+
+# ==========================================================
+# Terraform APPLY for Kafka Module
+# ==========================================================
+kafka:
   extends: .apply_template
   parallel:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: minio
+    MODULE_NAME: deployments/kafka

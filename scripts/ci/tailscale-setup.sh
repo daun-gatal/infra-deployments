@@ -3,7 +3,7 @@ set -e
 
 echo "🟦 Starting Tailscale…"
 mkdir -p /var/run/tailscale
-curl -fsSL https://tailscale.com/install.sh | TAILSCALE_VERSION=1.90.8 sh
+# NOTE: Tailscale is pre-installed in the Docker image.
 
 tailscaled \
   --tun=userspace-networking \
