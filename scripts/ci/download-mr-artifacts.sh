@@ -99,7 +99,6 @@ rm -f "${OUTPUT_FILE}"
 # Verify required files
 REQUIRED_FILES=(
   "${MODULE_NAME}/tfplan"
-  "${MODULE_NAME}/.backend.hcl"
   "${MODULE_NAME}/.terraform.lock.hcl"
 )
 
