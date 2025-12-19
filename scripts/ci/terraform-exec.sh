@@ -19,6 +19,14 @@ else
   echo "⚠️ .tf.env not found!"
 fi
 
+# Generate .tfvars explicitly to avoid passing it as artifact
+if [ -f .tf.env ]; then
+  echo "Generating .tfvars from .tf.env..."
+  envsubst < .tf.env > "${MODULE_NAME}/.tfvars"
+else
+  echo "⚠️ .tf.env not found!"
+fi
+
 cd "${MODULE_NAME}"
 
 # -------- Init --------
