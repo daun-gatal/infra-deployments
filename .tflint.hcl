@@ -14,6 +14,7 @@ rule "terraform_typed_variables" {
 rule "terraform_unused_declarations" {
   enabled = false
 }
+
 rule "terraform_module_pinned_source" {
   enabled = false
 }
