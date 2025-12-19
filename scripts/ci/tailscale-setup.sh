@@ -11,8 +11,8 @@ tailscaled \
   --socket=/var/run/tailscale/tailscaled.sock &
 
 sleep 5
-
-TAIL_HOST="gitlab-runner-${MODULE_NAME}-$(head /dev/urandom | tr -dc a-z0-9 | head -c6)"
+STATE_NAME=$(basename ${MODULE_NAME})
+TAIL_HOST="gitlab-runner-${STATE_NAME}-$(head /dev/urandom | tr -dc a-z0-9 | head -c6)"
 
 tailscale up \
   --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" \
