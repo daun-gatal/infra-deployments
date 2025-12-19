@@ -1,7 +1,6 @@
 stages:
   - build
   - validate
-  - dummy
   - plan
   - execute
 
@@ -62,20 +61,4 @@ build docker:
   tags:
     - k8s
 
-dummy job:
-  stage: dummy
-  image: ubuntu:22.04
-  before_script: []
-  script:
-    - echo "Running dummy job because specific files did NOT change"
-  rules:
-    # 1️⃣ Run during merge request pipelines
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-      when: always
-
-    # Default: never run outside MR or merge
-    - when: never
-
-  tags:
-    - k8s
 # Add comments to the jobs below as needed v1

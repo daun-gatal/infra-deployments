@@ -9,10 +9,12 @@
         - "${MODULE_NAME}/**/*"
   script:
     - cd ${MODULE_NAME}
-    - terraform init -backend=false
+    # Initialize without backend to avoid lock/auth errors during validation
+    - terraform init -backend=false -input=false
     - terraform validate
     - echo "🔍 Running TFLint..."
-    - tflint
+    # Use the root .tflint.hcl config
+    - tflint --config=../../.tflint.hcl
     - echo "🛡️ Running Trivy..."
     - trivy config . --severity HIGH,CRITICAL --exit-code 0
   tags:
