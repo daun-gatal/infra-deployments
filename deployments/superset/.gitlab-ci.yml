@@ -2,12 +2,21 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
+# Terraform VALIDATE for Superset Module
+# ==========================================================
+superset (validate):
+  extends: .validate_template
+  variables:
+    MODULE_NAME: deployments/superset
+
+# ==========================================================
 # Terraform PLAN for Superset Module
 # ==========================================================
 superset (plan):
   extends: .plan_template
+  needs: ["superset (validate)"]
   variables:
-    MODULE_NAME: superset
+    MODULE_NAME: deployments/superset
 
 # ==========================================================
 # Terraform APPLY for Superset Module
@@ -18,4 +27,4 @@ superset:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: superset
+    MODULE_NAME: deployments/superset

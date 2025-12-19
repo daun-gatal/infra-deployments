@@ -2,12 +2,21 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
+# Terraform VALIDATE for Metabase Module
+# ==========================================================
+metabase (validate):
+  extends: .validate_template
+  variables:
+    MODULE_NAME: deployments/metabase
+
+# ==========================================================
 # Terraform PLAN for Metabase Module
 # ==========================================================
 metabase (plan):
   extends: .plan_template
+  needs: ["metabase (validate)"]
   variables:
-    MODULE_NAME: metabase
+    MODULE_NAME: deployments/metabase
 
 # ==========================================================
 # Terraform APPLY for Metabase Module
@@ -18,6 +27,6 @@ metabase:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: metabase
+    MODULE_NAME: deployments/metabase
 
     
