@@ -10,7 +10,8 @@ set -euo pipefail
 : "${MODULE_NAME:?MODULE_NAME is required}"
 
 # Job naming
-JOB_NAME="${MODULE_NAME} (plan)"
+STATE_NAME=$(basename ${MODULE_NAME})
+JOB_NAME="${STATE_NAME} (plan)"
 
 echo "🔍 Finding MR associated with merge commit: ${CI_COMMIT_SHA}"
 
@@ -75,7 +76,7 @@ if [ "${ARTIFACTS_FILE}" == "none" ] || [ "${ARTIFACTS_FILE}" == "null" ]; then
 fi
 
 # Download artifacts
-OUTPUT_FILE="plan-${MODULE_NAME}.zip"
+OUTPUT_FILE="${STATE_NAME}.zip"
 
 echo "📦 Downloading artifacts from job ${JOB_ID}..."
 
