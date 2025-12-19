@@ -27,8 +27,6 @@
   image: $CI_REGISTRY_IMAGE/terraform-runner:latest
   variables:
     KUBECONFIG: "${KUBECONFIG_FILE}"
-    DB_OUTPUT_DIR: "database"
-    MINIO_OUTPUT_DIR: "minio"
 
   before_script:
     - chmod +x scripts/ci/setup-env.sh
@@ -42,11 +40,16 @@
     - when: never
 
   script:
+  script:
     - |
+      # Use basename (e.g. 'database' from 'deployments/database') to preserve existing state
+      STATE_NAME=$(basename ${MODULE_NAME})
+      echo "ℹ️  Using state name: ${STATE_NAME}"
+
       cat > ${MODULE_NAME}/.backend.hcl <<EOF
-      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}"
-      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
-      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${MODULE_NAME}/lock"
+      address         = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}"
+      lock_address    = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}/lock"
+      unlock_address  = "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${STATE_NAME}/lock"
       lock_method     = "POST"
       unlock_method   = "DELETE"
       retry_wait_min  = 5
