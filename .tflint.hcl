@@ -10,3 +10,7 @@ rule "terraform_required_version" {
 rule "terraform_typed_variables" {
   enabled = false
 }
+
+rule "terraform_unused_declarations" {
+  enabled = false
+}

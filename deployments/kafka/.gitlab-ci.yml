@@ -14,6 +14,7 @@ kafka (validate):
 # ==========================================================
 kafka (plan):
   extends: .plan_template
+  needs: ["kafka (validate)"]
   variables:
     MODULE_NAME: deployments/kafka
 

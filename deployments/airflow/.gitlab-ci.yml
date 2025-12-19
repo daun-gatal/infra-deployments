@@ -14,6 +14,7 @@ airflow (validate):
 # ==========================================================
 airflow (plan):
   extends: .plan_template
+  needs: ["airflow (validate)"]
   variables:
     MODULE_NAME: deployments/airflow
 

@@ -14,6 +14,7 @@ trino (validate):
 # ==========================================================
 trino (plan):
   extends: .plan_template
+  needs: ["trino (validate)"]
   variables:
     MODULE_NAME: deployments/trino
 

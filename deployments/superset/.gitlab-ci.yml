@@ -14,6 +14,7 @@ superset (validate):
 # ==========================================================
 superset (plan):
   extends: .plan_template
+  needs: ["superset (validate)"]
   variables:
     MODULE_NAME: deployments/superset
 

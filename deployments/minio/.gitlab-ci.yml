@@ -14,6 +14,7 @@ minio (validate):
 # ==========================================================
 minio (plan):
   extends: .plan_template
+  needs: ["minio (validate)"]
   variables:
     MODULE_NAME: deployments/minio
 

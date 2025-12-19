@@ -14,6 +14,7 @@ metabase (validate):
 # ==========================================================
 metabase (plan):
   extends: .plan_template
+  needs: ["metabase (validate)"]
   variables:
     MODULE_NAME: deployments/metabase
 
