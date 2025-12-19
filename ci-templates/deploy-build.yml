@@ -2,6 +2,8 @@
   stage: validate
   image: $CI_REGISTRY_IMAGE/terraform-runner:latest
   before_script:
+    - chmod +x scripts/ci/setup-env.sh
+    - bash scripts/ci/setup-env.sh
     - terraform --version
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
