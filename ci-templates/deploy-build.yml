@@ -81,6 +81,7 @@
     OUTPUT_DIR: "/opt/terraform-outputs"
     TF_ACTION: "refresh"
     DESTROY_ENABLED: "false"
+    IGNORE_PLAN: "false"
   before_script:
     - chmod +x scripts/ci/setup-env.sh 
     - chmod +x scripts/ci/tailscale-setup.sh
