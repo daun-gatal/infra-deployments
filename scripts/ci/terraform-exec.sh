@@ -6,6 +6,7 @@ TF_ACTION="${TF_ACTION:?TF_ACTION is required}"
 MODULE_NAME="${MODULE_NAME:?MODULE_NAME is required}"
 OUTPUT_DIR="${OUTPUT_DIR:-/opt/terraform-outputs}"
 DESTROY_ENABLED="${DESTROY_ENABLED:-false}"
+IGNORE_PLAN="${IGNORE_PLAN:-false}"
 
 echo "▶ Terraform action: ${TF_ACTION}"
 echo "▶ Module: ${MODULE_NAME}"
@@ -47,18 +48,15 @@ push_outputs() {
 # -------- Execute --------
 case "${TF_ACTION}" in
   apply)
-    if [ ! -f tfplan ]; then
-      echo "❌ tfplan not found. Apply must be plan-driven. Use 'apply-direct' for direct apply."
-      exit 1
+    if [ "${IGNORE_PLAN}" = "true" ]; then
+      echo "▶ IGNORE_PLAN=true → Running direct apply..."
+      terraform apply -auto-approve -compact-warnings -var-file=.tfvars
+      push_outputs
+      exit 0
     fi
+
     echo "▶ Applying from tfplan..."
     terraform apply -auto-approve -compact-warnings tfplan
-    push_outputs
-    ;;
-
-  apply-direct)
-    echo "▶ Applying directly..."
-    terraform apply -auto-approve -compact-warnings -var-file=.tfvars
     push_outputs
     ;;
 
