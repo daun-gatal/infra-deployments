@@ -5,6 +5,7 @@ set -euo pipefail
 TF_ACTION="${TF_ACTION:?TF_ACTION is required}"
 MODULE_NAME="${MODULE_NAME:?MODULE_NAME is required}"
 OUTPUT_DIR="${OUTPUT_DIR:-/opt/terraform-outputs}"
+DESTROY_ENABLED="${DESTROY_ENABLED:-false}"
 
 echo "▶ Terraform action: ${TF_ACTION}"
 echo "▶ Module: ${MODULE_NAME}"
@@ -66,6 +67,12 @@ case "${TF_ACTION}" in
     ;;
 
   destroy)
+    if [ "${DESTROY_ENABLED}" != "true" ]; then
+      echo "❌ Destroy disabled! Set DESTROY_ENABLED=true to allow destroy."
+      exit 1
+    fi
+
+    echo "▶ Destroy enabled. Proceeding..."
     terraform destroy -auto-approve -compact-warnings -var-file=.tfvars
     ;;
 
