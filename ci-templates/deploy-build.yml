@@ -1,6 +1,26 @@
+.validate_template:
+  stage: validate
+  image: $CI_REGISTRY_IMAGE/terraform-runner:latest
+  before_script:
+    - terraform --version
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      changes:
+        - "${MODULE_NAME}/**/*"
+  script:
+    - cd ${MODULE_NAME}
+    - terraform init -backend=false
+    - terraform validate
+    - echo "🔍 Running TFLint..."
+    - tflint
+    - echo "🛡️ Running Trivy..."
+    - trivy config . --severity HIGH,CRITICAL --exit-code 0
+  tags:
+    - k8s
+
 .plan_template:
   stage: plan
-  image: ubuntu:22.04
+  image: $CI_REGISTRY_IMAGE/terraform-runner:latest
   variables:
     KUBECONFIG: "${KUBECONFIG_FILE}"
     DB_OUTPUT_DIR: "database"
@@ -42,8 +62,6 @@
     name: "plan-${MODULE_NAME}"
     paths:
     - ${MODULE_NAME}/tfplan
-    - ${MODULE_NAME}/.backend.hcl
-    - ${MODULE_NAME}/.tfvars
     - ${MODULE_NAME}/.terraform.lock.hcl
     - ${MODULE_NAME}/.terraform/providers
     expire_in: 1 hour
@@ -52,7 +70,7 @@
 
 .apply_template:
   stage: execute
-  image: ubuntu:22.04
+  image: $CI_REGISTRY_IMAGE/terraform-runner:latest
   variables:
     KUBECONFIG: "${KUBECONFIG_FILE}"
     OUTPUT_DIR: "/opt/terraform-outputs"
@@ -67,6 +85,10 @@
     - bash scripts/ci/download-mr-artifacts.sh
 
   rules:
+    # 🚫 BLOCK DESTROY unless explicitly enabled in GitLab UI
+    - if: '$TF_ACTION == "destroy" && $DESTROY_ENABLED != "true"'
+      when: never
+      
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
         - "${MODULE_NAME}/main.tf"  

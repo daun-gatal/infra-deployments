@@ -2,20 +2,30 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
-# Terraform PLAN for Openbao Module
+# Terraform VALIDATE for Metabase Module
 # ==========================================================
-openbao (plan):
-  extends: .plan_template
+metabase (validate):
+  extends: .validate_template
   variables:
-    MODULE_NAME: openbao
+    MODULE_NAME: deployments/metabase
 
 # ==========================================================
-# Terraform APPLY for Openbao Module
+# Terraform PLAN for Metabase Module
 # ==========================================================
-openbao:
+metabase (plan):
+  extends: .plan_template
+  variables:
+    MODULE_NAME: deployments/metabase
+
+# ==========================================================
+# Terraform APPLY for Metabase Module
+# ==========================================================
+metabase:
   extends: .apply_template
   parallel:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: openbao
+    MODULE_NAME: deployments/metabase
+
+    

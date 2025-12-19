@@ -2,22 +2,29 @@ include:
   - local: 'ci-templates/deploy-build.yml'
 
 # ==========================================================
-# Terraform PLAN for Metabase Module
+# Terraform VALIDATE for Trino Module
 # ==========================================================
-metabase (plan):
-  extends: .plan_template
+trino (validate):
+  extends: .validate_template
   variables:
-    MODULE_NAME: metabase
+    MODULE_NAME: deployments/trino
 
 # ==========================================================
-# Terraform APPLY for Metabase Module
+# Terraform PLAN for Trino Module
 # ==========================================================
-metabase:
+trino (plan):
+  extends: .plan_template
+  variables:
+    MODULE_NAME: deployments/trino
+
+# ==========================================================
+# Terraform APPLY for Trino Module
+# ==========================================================
+trino:
   extends: .apply_template
   parallel:
     matrix:
       - TF_ACTION: [apply, apply-direct, refresh, destroy]
   variables:
-    MODULE_NAME: metabase
-
+    MODULE_NAME: deployments/trino
     
