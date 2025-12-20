@@ -1,26 +1,4 @@
-terraform {
-  backend "http" {}
-  required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "2.30.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "3.0.2"
-    }
-  }
-}
 
-provider "kubernetes" {
-  config_path = ""
-}
-
-provider "helm" {
-  kubernetes = {
-    config_path = ""
-  }
-}
 
 locals {
   github_oauth_config = templatefile(
@@ -35,8 +13,8 @@ locals {
 module "superset" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/superset?ref=main"
 
-  admin_password      = var.admin_password
-  oauth_config = local.github_oauth_config
+  admin_password        = var.admin_password
+  oauth_config          = local.github_oauth_config
   use_external_database = true
 
   enable_celery_worker = true
@@ -44,7 +22,7 @@ module "superset" {
 
   tailscale_expose = false
   tailscale_funnel = true
-  superset_port = 80
+  superset_port    = 80
 
   bootstrap_pip_packages = ["trino"]
 
