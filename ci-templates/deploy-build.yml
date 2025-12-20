@@ -25,7 +25,6 @@
 .plan_template:
   stage: plan
   image: $CI_REGISTRY_IMAGE/terraform-runner:latest
-  image: $CI_REGISTRY_IMAGE/terraform-runner:latest
   variables:
     KUBECONFIG: "${KUBECONFIG_FILE}"
 
@@ -77,7 +76,6 @@
 .apply_template:
   stage: execute
   image: $CI_REGISTRY_IMAGE/terraform-runner:latest
-  image: $CI_REGISTRY_IMAGE/terraform-runner:latest
   variables:
     KUBECONFIG: "${KUBECONFIG_FILE}"
     OUTPUT_DIR: "/opt/terraform-outputs"
@@ -94,10 +92,6 @@
     - bash scripts/ci/download-mr-artifacts.sh
 
   rules:
-    # 🚫 BLOCK DESTROY unless explicitly enabled in GitLab UI
-    - if: '$TF_ACTION == "destroy" && $DESTROY_ENABLED != "true"'
-      when: never
-      
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
       changes:
         - "${MODULE_NAME}/main.tf"  
