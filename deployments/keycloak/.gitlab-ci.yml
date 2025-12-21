@@ -1,0 +1,30 @@
+include:
+  - local: 'ci-templates/deploy-build.yml'
+
+# ==========================================================
+# Terraform VALIDATE for Keycloak Module
+# ==========================================================
+keycloak (validate):
+  extends: .validate_template
+  variables:
+    MODULE_NAME: deployments/keycloak
+
+# ==========================================================
+# Terraform PLAN for Keycloak Module
+# ==========================================================
+keycloak (plan):
+  extends: .plan_template
+  needs: ["keycloak (validate)"]
+  variables:
+    MODULE_NAME: deployments/keycloak
+
+# ==========================================================
+# Terraform APPLY for Keycloak Module
+# ==========================================================
+keycloak:
+  extends: .apply_template
+  parallel:
+    matrix:
+      - TF_ACTION: [apply, refresh, destroy]
+  variables:
+    MODULE_NAME: deployments/keycloak
