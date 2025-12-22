@@ -11,20 +11,20 @@ AUTH_ROLES_SYNC_AT_LOGIN = False  # Checks roles on every login
 
 # If you wish, you can add multiple OAuth providers.
 OAUTH_PROVIDERS = [
-    {
-        "name": "github",
-        "icon": "fa-github",
-        "token_key": "access_token",
-        "remote_app": {
-            "client_id": os.getenv("GITHUB_CLIENT_ID"),
-            "client_secret": os.getenv("GITHUB_CLIENT_SECRET"),
-            "api_base_url": "https://api.github.com",
-            "client_kwargs": {"scope": "read:user, read:org"},
-            "access_token_url": "https://github.com/login/oauth/access_token",
-            "authorize_url": "https://github.com/login/oauth/authorize",
-            "request_token_url": None,
-        },
-    },
+    # {
+    #     "name": "github",
+    #     "icon": "fa-github",
+    #     "token_key": "access_token",
+    #     "remote_app": {
+    #         "client_id": os.getenv("GITHUB_CLIENT_ID"),
+    #         "client_secret": os.getenv("GITHUB_CLIENT_SECRET"),
+    #         "api_base_url": "https://api.github.com",
+    #         "client_kwargs": {"scope": "read:user, read:org"},
+    #         "access_token_url": "https://github.com/login/oauth/access_token",
+    #         "authorize_url": "https://github.com/login/oauth/authorize",
+    #         "request_token_url": None,
+    #     },
+    # },
     {
         "name": "keycloak",
         "icon": "fa-key",
@@ -34,7 +34,7 @@ OAUTH_PROVIDERS = [
             "client_secret": os.getenv("KEYCLOAK_CLIENT_SECRET"),
             "api_base_url": "https://keycloak-web-ext.kitty-barb.ts.net/realms/airflow/protocol/",
             "server_metadata_url": "https://keycloak-web-ext.kitty-barb.ts.net/realms/airflow/.well-known/openid-configuration",
-            "client_kwargs": {"scope": "email profile"},
+            "client_kwargs": {"scope": "email profile openid"},
             "access_token_url": "https://keycloak-web-ext.kitty-barb.ts.net/realms/airflow/protocol/openid-connect/token",
             "authorize_url": "https://keycloak-web-ext.kitty-barb.ts.net/realms/airflow/protocol/openid-connect/auth",
             "request_token_url": None,
