@@ -23,4 +23,19 @@ OAUTH_PROVIDERS = [
             "request_token_url": None,
         },
     },
+    {
+        "name": "keycloak",
+        "icon": "fa-key",
+        "token_key": "access_token",
+        "remote_app": {
+            "client_id": "airflow-sso,
+            "client_secret": os.getenv("KEYCLOAK_CLIENT_SECRET"),
+            "api_base_url": "https://keycloak-web-ext.kitty-barb.ts.net/realms/airflow/protocol/",
+            "server_metadata_url": "https://keycloak-web-ext.kitty-barb.ts.net/realms/airflow/.well-known/openid-configuration",
+            "client_kwargs": {"scope": "email profile"},
+            "access_token_url": "https://keycloak-web-ext.kitty-barb.ts.net/realms/airflow/protocol/openid-connect/token",
+            "authorize_url": "https://keycloak-web-ext.kitty-barb.ts.net/realms/airflow/protocol/openid-connect/auth",
+            "request_token_url": None,
+        },
+    },
 ]

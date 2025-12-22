@@ -1,8 +1,8 @@
 
 
 locals {
-  github_oauth_config = templatefile(
-    "${path.module}/templates/github_oauth.tpl",
+  oauth_config = templatefile(
+    "${path.module}/templates/oauth.tpl",
     {}
   )
 }
@@ -52,7 +52,7 @@ module "airflow" {
   airflow_enable_triggerer   = true
   airflow_triggerer_replicas = 1
 
-  airflow_api_server_config = local.github_oauth_config
+  airflow_api_server_config = local.oauth_config
 
   values = {
     securityContexts = {
@@ -116,4 +116,4 @@ module "airflow" {
   }
 }
 
-# Add comments here if needed v10
+# Add comments here if needed v11
