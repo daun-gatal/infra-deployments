@@ -6,7 +6,7 @@ ENABLE_PROXY_FIX = True
 PREFERRED_URL_SCHEME = "https"
 
 AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB to register
-AUTH_USER_REGISTRATION_ROLE = "Public"
+AUTH_USER_REGISTRATION_ROLE = "Viewer"
 AUTH_ROLES_SYNC_AT_LOGIN = False  # Checks roles on every login
 
 # If you wish, you can add multiple OAuth providers.
