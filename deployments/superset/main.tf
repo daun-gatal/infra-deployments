@@ -1,11 +1,9 @@
 
 
 locals {
-  github_oauth_config = templatefile(
-    "${path.module}/templates/github_oauth.tpl",
-    {
-      auth_user_registration_role = "Public"
-    }
+  oauth_config = templatefile(
+    "${path.module}/templates/oauth.tpl",
+    {}
   )
 }
 
@@ -14,7 +12,7 @@ module "superset" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/superset?ref=main"
 
   admin_password        = var.admin_password
-  oauth_config          = local.github_oauth_config
+  oauth_config          = local.oauth_config
   use_external_database = true
 
   enable_celery_worker = true
