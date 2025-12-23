@@ -8,7 +8,7 @@ locals {
 }
 
 module "airflow" {
-  source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/airflow?ref=bakcup-main-20251216"
+  source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/airflow?ref=main"
 
 
   image_repository = "registry.gitlab.com/daun-gatal/image-repo/airflow"
