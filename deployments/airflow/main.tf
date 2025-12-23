@@ -54,66 +54,66 @@ module "airflow" {
 
   airflow_api_server_config = local.oauth_config
 
-  values = {
-    securityContexts = {
-      pod = {
-        runAsUser  = 50000
-        fsGroup    = 50000
-        runAsGroup = 50000
-      }
-    }
+  # values = {
+  #   securityContexts = {
+  #     pod = {
+  #       runAsUser  = 50000
+  #       fsGroup    = 50000
+  #       runAsGroup = 50000
+  #     }
+  #   }
 
-    extraEnvFrom = <<-EOT
-      - secretRef:
-          name: airflow-extraenv-secret
-    EOT
+  #   extraEnvFrom = <<-EOT
+  #     - secretRef:
+  #         name: airflow-extraenv-secret
+  #   EOT
 
-    workers = {
-      persistence = {
-        enabled          = true
-        size             = "10Gi"
-        storageClassName = "standard"
-        fixPermissions   = false
-      }
-    }
+  #   workers = {
+  #     persistence = {
+  #       enabled          = true
+  #       size             = "10Gi"
+  #       storageClassName = "standard"
+  #       fixPermissions   = false
+  #     }
+  #   }
 
-    triggerer = {
-      persistence = {
-        enabled          = true
-        size             = "10Gi"
-        storageClassName = "standard"
-        fixPermissions   = false
-      }
-    }
+  #   triggerer = {
+  #     persistence = {
+  #       enabled          = true
+  #       size             = "10Gi"
+  #       storageClassName = "standard"
+  #       fixPermissions   = false
+  #     }
+  #   }
 
-    logs = {
-      persistence = {
-        enabled          = false
-        size             = "10Gi"
-        storageClassName = "standard"
-      }
-    }
+  #   logs = {
+  #     persistence = {
+  #       enabled          = false
+  #       size             = "10Gi"
+  #       storageClassName = "standard"
+  #     }
+  #   }
 
-    ingress = {
-      apiServer = {
-        enabled          = true
-        path             = "/"
-        pathType         = "Prefix"
-        ingressClassName = "tailscale"
-        hosts = [
-          {
-            name = "airflow-web-ext"
-            tls = {
-              enabled = true
-            }
-          }
-        ]
-        annotations = {
-          "tailscale.com/funnel" : "true"
-        }
-      }
-    }
-  }
+  #   ingress = {
+  #     apiServer = {
+  #       enabled          = true
+  #       path             = "/"
+  #       pathType         = "Prefix"
+  #       ingressClassName = "tailscale"
+  #       hosts = [
+  #         {
+  #           name = "airflow-web-ext"
+  #           tls = {
+  #             enabled = true
+  #           }
+  #         }
+  #       ]
+  #       annotations = {
+  #         "tailscale.com/funnel" : "true"
+  #       }
+  #     }
+  #   }
+  # }
 }
 
 # Add comments here if needed v15
