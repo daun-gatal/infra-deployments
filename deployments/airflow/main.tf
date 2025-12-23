@@ -12,7 +12,7 @@ module "airflow" {
 
 
   image_repository = "registry.gitlab.com/daun-gatal/image-repo/airflow"
-  image_tag        = "3.1.1"
+  image_tag        = "3.1.5"
   namespace        = "airflow"
 
   # Executor configuration
