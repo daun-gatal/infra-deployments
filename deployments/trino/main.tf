@@ -1,4 +1,4 @@
-module "trino_readonly" {
+module "trino" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/trino?ref=main"
 
   trino_shared_secret   = var.trino_shared_secret
