@@ -1,5 +1,3 @@
-
-
 locals {
   oauth_config = templatefile(
     "${path.module}/templates/oauth.tpl",
@@ -116,4 +114,4 @@ module "airflow" {
   }
 }
 
-# Add comments here if needed v15
+# Add comments here if needed v16
