@@ -1,0 +1,7 @@
+# Exclude terraform resources
+.terraform*
+tfplan
+
+# Exclude credentials
+*.backend.hcl
+*.tfvars
