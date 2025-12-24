@@ -73,15 +73,15 @@ class TrinoKeycloakAuth(Authentication):
             if cached and time.time() < (cached['expiry'] - 30):
                 return cached['access_token']
 
+        # Use Basic Auth for client_credentials as per standard
+        auth = (self.client_id, self.client_secret)
         payload = {
             'grant_type': 'client_credentials',
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
             'scope': self.scope
         }
         
         try:
-            response = requests.post(self.token_endpoint, data=payload, timeout=10)
+            response = requests.post(self.token_endpoint, data=payload, auth=auth, timeout=10)
             response.raise_for_status()
             data = response.json()
             
