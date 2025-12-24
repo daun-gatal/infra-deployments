@@ -1,3 +1,4 @@
+import time
 import requests
 from trino.auth import Authentication
 
@@ -22,35 +23,73 @@ class TrinoKeycloakAuth(Authentication):
             self.password = password
             self.scope = scope
 
+        # Token caching state
+        self._access_token = None
+        self._refresh_token = None
+        self._token_expiry = 0
+
+    def _handle_token_response(self, response_data):
+        """Helper to update internal state from a successful token response"""
+        self._access_token = response_data.get('access_token')
+        self._refresh_token = response_data.get('refresh_token')
+        
+        # Calculate expiry time (current time + expires_in)
+        # Default to 0 if not provided to force refresh next time
+        expires_in = response_data.get('expires_in', 0)
+        self._token_expiry = time.time() + expires_in
+
     def _get_token(self) -> str:
+        # 1. Check if current access token is valid (with 30 second buffer)
+        if self._access_token and time.time() < (self._token_expiry - 30):
+            return self._access_token
+
+        # 2. Try to refresh if we have a refresh token and it's expired
+        if self._refresh_token:
+            try:
+                self._perform_refresh()
+                return self._access_token
+            except Exception:
+                # If refresh fails (e.g., refresh token expired), fall through to full login
+                pass
+
+        # 3. Perform full authentication (Password Grant)
+        self._perform_login()
+        return self._access_token
+
+    def _perform_login(self):
         if not self.token_endpoint or not self.client_id:
              raise ValueError("Missing required Auth params")
 
-        # CASE 1: Specific User Login (Password Grant)
-        if self.username and self.password:
-            payload = {
-                'grant_type': 'password',  # <--- Authenticates a specific user
-                'client_id': self.client_id,
-                'client_secret': self.client_secret,
-                'username': self.username,
-                'password': self.password,
-                'scope': self.scope
-            }
-        # CASE 2: Service Account Login (Client Credentials)
-        else:
-            payload = {
-                'grant_type': 'client_credentials',
-                'client_id': self.client_id,
-                'client_secret': self.client_secret,
-                'scope': self.scope
-            }
+        if not self.username or not self.password:
+             raise ValueError("Missing required Auth params: username and password")
+
+        payload = {
+            'grant_type': 'password',
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'username': self.username,
+            'password': self.password,
+            'scope': self.scope
+        }
         
         try:
             response = requests.post(self.token_endpoint, data=payload, timeout=10)
             response.raise_for_status()
-            return response.json().get('access_token')
+            self._handle_token_response(response.json())
         except Exception as e:
             raise Exception(f"Failed to authenticate with Keycloak: {str(e)}")
+
+    def _perform_refresh(self):
+        payload = {
+            'grant_type': 'refresh_token',
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+            'refresh_token': self._refresh_token
+        }
+        
+        response = requests.post(self.token_endpoint, data=payload, timeout=10)
+        response.raise_for_status()
+        self._handle_token_response(response.json())
 
     def set_http_session(self, http_session):
         def auth_header_hook(request):
