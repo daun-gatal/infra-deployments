@@ -1,183 +1,204 @@
 import time
 import requests
 import threading
+import logging
 from requests.exceptions import HTTPError, Timeout, ConnectionError
 from trino.auth import Authentication
 
+# Configure logging to catch issues in Superset logs
+logger = logging.getLogger(__name__)
+
 class TrinoKeycloakAuth(Authentication):
-    _token_cache = {}
+    """
+    Custom Trino Authentication for Superset with Keycloak.
+    
+    Mechanism:
+    1. Authenticates as a Service Account (Client Credentials) to get a Master Token.
+    2. Detects the logged-in Superset User.
+    3. Exchanges the Master Token for a User-Specific Token (Token Exchange).
+    4. Passes the User Token to Trino.
+    """
+    
+    # -------------------------------------------------------------------------
+    # GLOBAL CACHE
+    # Shared across all instances to prevent opening too many Keycloak sessions.
+    # -------------------------------------------------------------------------
+    _service_cache = {} 
+    _user_cache = {}
     _cache_lock = threading.Lock()
 
     def __init__(self, token_endpoint=None, client_id=None, client_secret=None, 
-                 username=None, password=None, scope='openid', **kwargs):
+                 scope='openid', **kwargs):
         
+        # Support initializing from Superset's 'auth_params' dictionary
         if 'auth_params' in kwargs:
             params = kwargs['auth_params']
             self.token_endpoint = params.get('token_endpoint')
             self.client_id = params.get('client_id')
             self.client_secret = params.get('client_secret')
-            self.username = params.get('username')
-            self.password = params.get('password')
             self.scope = params.get('scope', 'openid')
         else:
             self.token_endpoint = token_endpoint
             self.client_id = client_id
             self.client_secret = client_secret
-            self.username = username
-            self.password = password
             self.scope = scope
 
-    @property
-    def _cache_key(self):
-        return (self.token_endpoint, self.client_id, self.username)
-
-    def _get_cached_data(self):
-        with self._cache_lock:
-            return self._token_cache.get(self._cache_key)
-
-    def _clear_cache(self):
-        with self._cache_lock:
-            if self._cache_key in self._token_cache:
-                del self._token_cache[self._cache_key]
-
-    def _update_cache(self, response_data):
-        expires_in = response_data.get('expires_in', 0)
-        expiry_time = time.time() + expires_in
-        
-        cache_entry = {
-            'access_token': response_data.get('access_token'),
-            'refresh_token': response_data.get('refresh_token'), 
-            'expiry': expiry_time
-        }
-        
-        with self._cache_lock:
-            self._token_cache[self._cache_key] = cache_entry
-            
-        return cache_entry
-
-    def _handle_request_error(self, error):
-        if isinstance(error, Timeout):
-            raise Exception("Authentication Failed: Connection to identity provider timed out.")
-        if isinstance(error, ConnectionError):
-            raise Exception("Authentication Failed: Unable to connect to identity provider.")
-        if isinstance(error, HTTPError):
-            code = error.response.status_code
-            if code == 401:
-                raise Exception("Authentication Failed: Invalid username or password.")
-            elif code == 400:
-                raise Exception("Authentication Failed: Invalid request (check client_id/secret).")
-            elif code == 403:
-                raise Exception("Authentication Failed: Access denied.")
-            elif code == 404:
-                raise Exception("Authentication Failed: Auth endpoint not found.")
-            elif code >= 500:
-                raise Exception("Authentication Failed: Identity provider server error.")
-            else:
-                raise Exception(f"Authentication Failed: Server returned status {code}.")
-        raise Exception("Authentication Failed: An unexpected error occurred.")
-
-    def _get_logout_url(self):
-        # Infer logout URL from token URL
-        # Keycloak Standard: .../openid-connect/token -> .../openid-connect/logout
-        if self.token_endpoint.endswith('/token'):
-            return self.token_endpoint[:-6] + '/logout'
-        return self.token_endpoint.replace('/token', '/logout')
-
-    def _perform_logout(self, refresh_token):
+    def _get_superset_user(self):
         """
-        Calls Keycloak logout endpoint to delete the session on the server.
+        Safely retrieve the current Superset user from the Flask context.
+        Returns None if running in a background task (Celery).
         """
-        if not refresh_token:
-            return
-
-        logout_url = self._get_logout_url()
-        payload = {
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
-            'refresh_token': refresh_token
-        }
-        
         try:
-            # We assume best-effort logout. If it fails, the session might 
-            # already be dead or we have network issues, but we must proceed.
-            requests.post(logout_url, data=payload, timeout=5)
+            from flask import g
+            if hasattr(g, 'user') and hasattr(g.user, 'username'):
+                return g.user.username
         except Exception:
-            # Swallow logout errors to prevent blocking the new login attempt
+            # Not in a web request context
             pass
+        return None
 
-    def _get_token(self) -> str:
-        cached = self._get_cached_data()
-
-        if cached:
-            # 1. Check if Access Token is valid
-            if time.time() < (cached['expiry'] - 30):
+    def _get_service_token(self):
+        """
+        Get the Master Token for the Service Account (Superset Client).
+        Uses Client Credentials Flow.
+        """
+        cache_key = self.client_id
+        
+        # 1. Check Cache
+        with self._cache_lock:
+            cached = self._service_cache.get(cache_key)
+            if cached and time.time() < (cached['expiry'] - 30):
                 return cached['access_token']
-            
-            # --- TOKEN EXPIRED ---
-            refresh_token = cached.get('refresh_token')
-            
-            # 2. Try to Refresh first (most efficient)
-            if refresh_token:
-                try:
-                    return self._perform_refresh(refresh_token)
-                except Exception:
-                    # 3. If Refresh fails, cleanup Keycloak session
-                    self._perform_logout(refresh_token)
-                    self._clear_cache()
-            else:
-                # No refresh token? Just clear local
-                self._clear_cache()
 
-        # 4. Fallback: Full Login
-        return self._perform_login()
-
-    def _perform_login(self):
-        if not self.username or not self.password:
-             raise ValueError("Authentication Failed: Missing username or password.")
-
+        # 2. Request New Token
         payload = {
-            'grant_type': 'password',
+            'grant_type': 'client_credentials',
             'client_id': self.client_id,
             'client_secret': self.client_secret,
-            'username': self.username,
-            'password': self.password,
             'scope': self.scope
         }
         
         try:
             response = requests.post(self.token_endpoint, data=payload, timeout=10)
             response.raise_for_status()
-            data = self._update_cache(response.json())
+            data = response.json()
+            
+            # 3. Update Cache
+            expiry = time.time() + data.get('expires_in', 60)
+            with self._cache_lock:
+                self._service_cache[cache_key] = {
+                    'access_token': data['access_token'],
+                    'expiry': expiry
+                }
             return data['access_token']
         except Exception as e:
+            logger.error(f"TrinoAuth: Service Login failed: {e}")
             self._handle_request_error(e)
 
-    def _perform_refresh(self, refresh_token):
+    def _get_impersonated_user_token(self, username, service_token):
+        """
+        Exchange the Service Token for a User Token.
+        STRICT: Raises exception if User does not exist or access is denied.
+        """
+        cache_key = (self.client_id, username)
+
+        # 1. Check Cache
+        with self._cache_lock:
+            cached = self._user_cache.get(cache_key)
+            if cached and time.time() < (cached['expiry'] - 30):
+                return cached['access_token']
+
+        # 2. Perform Token Exchange
         payload = {
-            'grant_type': 'refresh_token',
+            'grant_type': 'urn:ietf:params:oauth:grant-type:token-exchange',
             'client_id': self.client_id,
             'client_secret': self.client_secret,
-            'refresh_token': refresh_token
+            'subject_token': service_token,
+            'requested_subject': username,
+            'scope': self.scope
         }
+
+        try:
+            response = requests.post(self.token_endpoint, data=payload, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            
+            # 3. Update Cache
+            expiry = time.time() + data.get('expires_in', 60)
+            with self._cache_lock:
+                self._user_cache[cache_key] = {
+                    'access_token': data['access_token'],
+                    'expiry': expiry
+                }
+            return data['access_token']
+
+        except HTTPError as e:
+            code = e.response.status_code
+            if code == 400:
+                # Keycloak usually returns 400 if 'requested_subject' is invalid
+                msg = f"Access Denied: User '{username}' does not exist in Identity Provider (Keycloak)."
+                logger.error(msg)
+                raise Exception(msg)
+            if code == 404:
+                raise Exception(f"Access Denied: User '{username}' not found.")
+            if code == 403:
+                msg = f"Access Denied: Superset Client is not authorized to impersonate '{username}'. Check Keycloak policies."
+                logger.error(msg)
+                raise Exception(msg)
+            raise e
+        except Exception as e:
+            logger.error(f"TrinoAuth: Token Exchange failed for {username}: {e}")
+            raise e
+
+    def _handle_request_error(self, error):
+        """Sanitize error messages to avoid leaking secrets"""
+        if isinstance(error, Timeout): 
+            raise Exception("Authentication Failed: Connection to identity provider timed out.")
+        if isinstance(error, ConnectionError): 
+            raise Exception("Authentication Failed: Unable to connect to identity provider.")
+        if isinstance(error, HTTPError):
+            code = error.response.status_code
+            if code == 401:
+                raise Exception("System Auth Failed: Invalid Client ID or Secret.")
         
-        # If this fails, it raises exception caught by _get_token
-        response = requests.post(self.token_endpoint, data=payload, timeout=10)
-        response.raise_for_status()
-        
-        data = self._update_cache(response.json())
-        return data['access_token']
+        # Generic fallback
+        raise Exception("Authentication Failed: An unexpected error occurred. Check logs.")
 
     def set_http_session(self, http_session):
         def auth_header_hook(request):
-            token = self._get_token()
-            request.headers['Authorization'] = f'Bearer {token}'
+            # 1. Get Master Token (Always required)
+            service_token = self._get_service_token()
+            
+            # 2. Identify Superset User
+            superset_user = self._get_superset_user()
+            
+            final_token = service_token
+            
+            if superset_user:
+                # 3. INTERACTIVE MODE: Impersonate the real user
+                # This will RAISE AN EXCEPTION if the user is missing/invalid
+                final_token = self._get_impersonated_user_token(superset_user, service_token)
+            else:
+                # 4. BACKGROUND MODE: Use Service Account
+                # No user logged in (e.g., Scheduled Report), run as Service Account
+                pass
+
+            request.headers['Authorization'] = f'Bearer {final_token}'
             return request
+            
         http_session.auth = auth_header_hook
 
     def get_exceptions(self):
         return ()
 
     def authenticate(self, request):
-        token = self._get_token()
-        request.headers['Authorization'] = f'Bearer {token}'
+        service_token = self._get_service_token()
+        superset_user = self._get_superset_user()
+        
+        final_token = service_token
+        
+        if superset_user:
+            final_token = self._get_impersonated_user_token(superset_user, service_token)
+            
+        request.headers['Authorization'] = f'Bearer {final_token}'
         return request
