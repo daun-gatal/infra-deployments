@@ -1,10 +1,18 @@
+locals {
+  oauth_config = templatefile(
+    "${path.module}/templates/oauth.tpl",
+    {}
+  )
+}
+
+
 module "trino" {
   source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/trino?ref=main"
 
   trino_shared_secret   = var.trino_shared_secret
   worker_count          = 1
   coordinator_as_worker = true
-  tailscale_expose      = true
+  tailscale_expose      = false
   enabled_catalogs = [
     {
       name = "datalake"
@@ -26,6 +34,54 @@ module "trino" {
       }
     }
   ]
+
+  values = {
+    envFrom = [
+      {
+        secretRef = {
+          name = "trino-oauth-secret"
+        }
+      }
+    ]
+
+    server = {
+      config = {
+        https = {
+          enabled = true
+          port = 443
+        }
+        authenticationType = "OAUTH2"
+      }
+
+      coordinatorExtraConfig = local.oauth_config
+    }
+
+    ingress = {
+      enabled = true
+      className = "tailscale"
+      annotations = {
+        "tailscale.com/funnel" : "true"
+      }
+      hosts = [
+        {
+          host = "trino-ext"
+          paths = [
+            {
+              path = "/"
+              pathType = "Prefix"
+            }
+          ]
+        }
+      ]
+      tls = [
+        {
+          hosts = [
+            "trino-ext"
+          ]
+        }
+      ]
+    }
+  }
 }
 
 # Add comments v6
