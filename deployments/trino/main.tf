@@ -47,10 +47,8 @@ module "trino" {
     server = {
       config = {
         https = {
-          enabled = true
-          port = 443
+          enabled = false
         }
-        authenticationType = "OAUTH2"
       }
 
       coordinatorExtraConfig = local.oauth_config
@@ -85,4 +83,4 @@ module "trino" {
   }
 }
 
-# Add comments v7
+# Add comments v8
