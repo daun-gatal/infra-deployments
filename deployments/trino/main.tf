@@ -3,6 +3,11 @@ locals {
     "${path.module}/templates/oauth.tpl",
     {}
   )
+
+  properties = templatefile(
+    "${path.module}/templates/properties.tpl",
+    {}
+  )
 }
 
 
@@ -36,10 +41,20 @@ module "trino" {
   ]
 
   values = {
+    accessControl = {
+      type = "properties"
+      properties = local.properties
+    }
+
     envFrom = [
       {
         secretRef = {
           name = "trino-oauth-secret"
+        }
+      },
+      {
+        secretRef = {
+          name = "trino-acl-secret"
         }
       }
     ]
