@@ -1,1 +1,1 @@
-access-control.name=$${ENV:SYSTEM_ACL}
+access-control.name=read-only

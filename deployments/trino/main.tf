@@ -51,11 +51,6 @@ module "trino" {
         secretRef = {
           name = "trino-oauth-secret"
         }
-      },
-      {
-        secretRef = {
-          name = "trino-acl-secret"
-        }
       }
     ]
 
