@@ -1,3 +1,7 @@
+
+http-server.process-forwarded=true
+http-server.authentication.type=oauth2
+
 http-server.authentication.oauth2.issuer=https://keycloak-web-ext.kitty-barb.ts.net/realms/trino
 http-server.authentication.oauth2.auth-url=https://keycloak-web-ext.kitty-barb.ts.net/realms/trino/protocol/openid-connect/auth
 http-server.authentication.oauth2.token-url=https://keycloak-web-ext.kitty-barb.ts.net/realms/trino/protocol/openid-connect/token
