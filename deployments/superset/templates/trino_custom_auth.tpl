@@ -10,8 +10,14 @@ logger = logging.getLogger(__name__)
 
 class TrinoKeycloakAuth(Authentication):
     """
-    Trino Authentication using Keycloak 'Direct Naked Impersonation'.
-    Workaround for 'requested_subject not supported in standard token exchange'.
+    Trino Authentication using Keycloak Standard Token Exchange.
+    
+    Flow:
+    1. Authenticate this client (Superset) using Client Credentials to get a Service Token.
+    2. Perform Token Exchange using the Service Token as 'subject_token'.
+    3. Specify the target user via 'requested_subject'.
+    
+    Ref: https://www.keycloak.org/securing-apps/token-exchange
     """
     
     _service_cache = {} 
@@ -19,27 +25,38 @@ class TrinoKeycloakAuth(Authentication):
     _cache_lock = threading.Lock()
 
     def __init__(self, token_endpoint=None, client_id=None, client_secret=None, 
-                 scope=None, audience=None, **kwargs):
+                 scope=None, audience=None, requested_token_type=None, **kwargs):
         
+        # Support both nested 'auth_params' and direct kwargs unpacking
         if 'auth_params' in kwargs:
             params = kwargs['auth_params']
             self.token_endpoint = params.get('token_endpoint')
             self.client_id = params.get('client_id')
             self.client_secret = params.get('client_secret')
             self.scope = params.get('scope', 'openid profile email')
-            self.audience = params.get('audience', self.client_id)
+            self.audience = params.get('audience')
+            self.requested_token_type = params.get('requested_token_type')
         else:
             self.token_endpoint = token_endpoint
             self.client_id = client_id
             self.client_secret = client_secret
             self.scope = scope if scope else 'openid profile email'
-            self.audience = audience if audience else client_id
+            self.audience = audience
+            self.requested_token_type = requested_token_type
+
+        # Fallback to env var if secret is missing
+        if not self.client_secret:
+            import os
+            self.client_secret = os.getenv('TRINO_AUTH_CLIENT_SECRET')
 
     def _get_superset_user(self):
         try:
             from flask import g
-            if hasattr(g, 'user') and hasattr(g.user, 'username'):
-                return g.user.username
+            if hasattr(g, 'user'):
+                if hasattr(g.user, 'is_anonymous') and g.user.is_anonymous:
+                    return None
+                if hasattr(g.user, 'username'):
+                    return g.user.username
         except Exception:
             pass
         return None
@@ -47,7 +64,7 @@ class TrinoKeycloakAuth(Authentication):
     def _get_service_token(self):
         """
         Get Service Account Token (Client Credentials).
-        Used for background tasks where no user is logged in.
+        This token is used as the 'subject_token' in the exchange to identify the caller.
         """
         cache_key = self.client_id
         
@@ -79,10 +96,13 @@ class TrinoKeycloakAuth(Authentication):
             logger.error(f"TrinoAuth: Service Login failed: {e}")
             self._handle_request_error(e)
 
-    def _get_impersonated_user_token(self, username):
+    def _exchange_token(self, username):
         """
-        Direct Naked Impersonation (Legacy/Extension Mode).
-        Does NOT send subject_token to avoid 'standard exchange' validation.
+        Perform Standard Token Exchange.
+        
+        subject_token = Service Token (Access Token of this client)
+        subject_token_type = urn:ietf:params:oauth:token-type:access_token
+        requested_subject = username (Target user to impersonate)
         """
         cache_key = (self.client_id, username)
 
@@ -91,29 +111,37 @@ class TrinoKeycloakAuth(Authentication):
             if cached and time.time() < (cached['expiry'] - 30):
                 return cached['access_token']
 
-        # DIRECT NAKED IMPERSONATION PAYLOAD
-        # Removing subject_token tells Keycloak we are doing a "Naked" exchange
+        # 1. Get Service Token
+        service_token = self._get_service_token()
+        if not service_token:
+            raise Exception("TrinoAuth: Could not obtain Service Token for Exchange.")
+
+        # 2. Prepare Exchange Payload
         payload = {
             'grant_type': 'urn:ietf:params:oauth:grant-type:token-exchange',
             'client_id': self.client_id,
             'client_secret': self.client_secret,
+            'subject_token': service_token,
+            'subject_token_type': 'urn:ietf:params:oauth:token-type:access_token',
             'requested_subject': username,
             'scope': self.scope
         }
         
         if self.audience:
             payload['audience'] = self.audience
+            
+        if self.requested_token_type:
+            payload['requested_token_type'] = self.requested_token_type
 
         try:
             response = requests.post(self.token_endpoint, data=payload, timeout=10)
             
             if response.status_code != 200:
-                 try:
-                     err = response.json()
-                     logger.error(f"Impersonation Failed: {err}")
-                 except:
-                     logger.error(f"Impersonation Failed: {response.text}")
-            
+                logger.warning(f"Token Exchange failed for {username}: {response.status_code} - {response.text}")
+                # Check for "User not found" or "Impersonation forbidden" scenarios
+                if response.status_code in [400, 404]:
+                     raise Exception("User not found")
+                
             response.raise_for_status()
             
             data = response.json()
@@ -126,15 +154,15 @@ class TrinoKeycloakAuth(Authentication):
             return data['access_token']
 
         except HTTPError as e:
-            code = e.response.status_code
-            if code == 403:
-                # This confirms we are hitting the Impersonation logic but lacking permission
-                raise Exception(f"Access Denied: Client '{self.client_id}' is not allowed to impersonate users. Check 'Users -> Permissions -> Impersonate'.")
-            if code == 400:
-                raise Exception(f"Access Denied: Invalid request or user '{username}' not found.")
-            raise e
+             if e.response.status_code in [400, 404]:
+                 raise Exception("User not found")
+             if e.response.status_code == 403:
+                 raise Exception(f"Access Denied: Client '{self.client_id}' cannot exchange token for user '{username}'.")
+             raise e
             
         except Exception as e:
+            if str(e) == "User not found":
+                raise e
             logger.error(f"TrinoAuth: Error for {username}: {e}")
             raise e
 
@@ -148,10 +176,10 @@ class TrinoKeycloakAuth(Authentication):
             superset_user = self._get_superset_user()
             
             if superset_user:
-                # Use Naked Impersonation
-                token = self._get_impersonated_user_token(superset_user)
+                # Use Token Exchange
+                token = self._exchange_token(superset_user)
             else:
-                # Fallback to Service Account
+                # Fallback to Service Account for background tasks
                 token = self._get_service_token()
                 
             request.headers['Authorization'] = f'Bearer {token}'
@@ -165,7 +193,7 @@ class TrinoKeycloakAuth(Authentication):
         superset_user = self._get_superset_user()
         
         if superset_user:
-            token = self._get_impersonated_user_token(superset_user)
+            token = self._exchange_token(superset_user)
         else:
             token = self._get_service_token()
             
