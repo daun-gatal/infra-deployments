@@ -1,4 +1,7 @@
 from flask_appbuilder.security.manager import AUTH_OAUTH
+from trino_custom_auth import TrinoKeycloakAuth
+
+from typing import Dict, Any, Callable
 
 ENABLE_PROXY_FIX = True
 PREFERRED_URL_SCHEME = "https"
@@ -42,3 +45,9 @@ OAUTH_PROVIDERS = [
 
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Gamma"
+
+ALLOWED_EXTRA_AUTHENTICATIONS: Dict[str, Dict[str, Callable[..., Any]]] = {
+    "trino": {
+        "custom_keycloak": TrinoKeycloakAuth,
+    },
+}
