@@ -19,6 +19,7 @@
     - tflint --config=../../.tflint.hcl
     - echo "🛡️ Running Trivy..."
     - trivy config . --severity HIGH,CRITICAL --exit-code 0
+  allow_failure: false
   tags:
     - k8s
 
