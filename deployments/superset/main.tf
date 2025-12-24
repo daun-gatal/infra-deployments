@@ -1,8 +1,11 @@
-
-
 locals {
   oauth_config = templatefile(
     "${path.module}/templates/oauth.tpl",
+    {}
+  )
+
+  trino_auth = templatefile(
+    "${path.module}/templates/trino_custom_auth.tpl",
     {}
   )
 }
@@ -25,6 +28,16 @@ module "superset" {
   bootstrap_pip_packages = ["trino"]
 
   enable_superset_autoscaling = false
+
+  values = {
+    extraConfigs = {
+      "trino_custom_auth.py" = local.trino_auth
+    }
+
+    extraEnv = {
+      PYTHONPATH = "/app/pythonpath:/app/configs"
+    }
+  }
 }
 
 # Add comments here v5
