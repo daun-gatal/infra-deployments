@@ -75,6 +75,7 @@ module "trino" {
       ]
       tls = [
         {
+          secretName = ""
           hosts = [
             "trino-ext"
           ]
