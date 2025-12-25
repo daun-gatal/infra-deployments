@@ -9,11 +9,9 @@ include:
   - local: 'deployments/minio/.gitlab-ci.yml'
   - local: 'deployments/kafka/.gitlab-ci.yml'
   - local: 'deployments/trino/.gitlab-ci.yml'
-  - local: 'deployments/metabase/.gitlab-ci.yml'
   - local: 'deployments/airflow/.gitlab-ci.yml'
   - local: 'deployments/openbao/.gitlab-ci.yml'
   - local: 'deployments/superset/.gitlab-ci.yml'
-  - local: 'deployments/airbyte/.gitlab-ci.yml'
   - local: 'deployments/keycloak/.gitlab-ci.yml'
 
 # ==========================================================
