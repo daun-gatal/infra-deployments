@@ -1,0 +1,30 @@
+include:
+  - local: 'ci-templates/deploy-build.yml'
+
+# ==========================================================
+# Terraform VALIDATE for Dockge Module
+# ==========================================================
+dockge (validate):
+  extends: .validate_template
+  variables:
+    MODULE_NAME: deployments/dockge
+
+# ==========================================================
+# Terraform PLAN for Dockge Module
+# ==========================================================
+dockge (plan):
+  extends: .plan_template
+  needs: ["dockge (validate)"]
+  variables:
+    MODULE_NAME: deployments/dockge
+
+# ==========================================================
+# Terraform APPLY for Dockge Module
+# ==========================================================
+dockge:
+  extends: .apply_template
+  parallel:
+    matrix:
+      - TF_ACTION: [apply, refresh, destroy]
+  variables:
+    MODULE_NAME: deployments/dockge
