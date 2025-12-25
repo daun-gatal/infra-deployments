@@ -4,7 +4,8 @@ module "dockge" {
   namespace    = "dockge"
   service_port = 80
 
-  tailscale_funnel = true
+  tailscale_funnel = false
+  tailscale_expose = true
   
   tailscale_app_expose = true
   additional_ports = []
