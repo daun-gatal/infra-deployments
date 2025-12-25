@@ -13,6 +13,7 @@ include:
   - local: 'deployments/openbao/.gitlab-ci.yml'
   - local: 'deployments/superset/.gitlab-ci.yml'
   - local: 'deployments/keycloak/.gitlab-ci.yml'
+  - local: 'deployments/dockge/.gitlab-ci.yml'
 
 # ==========================================================
 # Docker Image Build
