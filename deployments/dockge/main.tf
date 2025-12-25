@@ -5,6 +5,9 @@ module "dockge" {
   service_port = 80
 
   tailscale_funnel = true
+  
+  tailscale_app_expose = true
+  additional_ports = []
 }
 
 # Add comments here if needed v1
