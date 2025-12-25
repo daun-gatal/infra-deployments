@@ -8,7 +8,6 @@ module "dockge" {
   tailscale_expose = true
   
   tailscale_app_expose = true
-  additional_ports = []
 
   resources = {
     dind = {
