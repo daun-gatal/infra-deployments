@@ -9,6 +9,19 @@ module "dockge" {
   
   tailscale_app_expose = true
   additional_ports = []
+
+  resources = {
+    dind = {
+      requests = {
+        cpu    = "100m"
+        memory = "256Mi"
+      }
+      limits = {
+        cpu    = "6000m"
+        memory = "12Gi"
+      }
+    }
+  }
 }
 
 # Add comments here if needed v2
