@@ -8,7 +8,6 @@ module "dockge" {
   tailscale_expose = true
   
   tailscale_app_expose = true
-  additional_ports = []
 
   resources = {
     dind = {
@@ -22,6 +21,13 @@ module "dockge" {
       }
     }
   }
+
+  additional_ports = [
+    {
+      name = "port_8080"
+      port = 8080
+    }
+  ]
 }
 
 # Add comments here if needed v2
