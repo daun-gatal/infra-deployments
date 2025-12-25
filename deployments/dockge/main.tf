@@ -22,6 +22,13 @@ module "dockge" {
       }
     }
   }
+
+  additional_ports = [
+    {
+      name = "port_8080"
+      port = 8080
+    }
+  ]
 }
 
 # Add comments here if needed v2
