@@ -24,7 +24,7 @@ module "dockge" {
 
   additional_ports = [
     {
-      name = "port_8080"
+      name = "port-8080"
       port = 8080
     }
   ]
