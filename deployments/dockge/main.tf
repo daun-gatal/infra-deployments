@@ -30,6 +30,14 @@ module "dockge" {
     {
       name = "port-5432"
       port = 5432
+    },
+    {
+      name = "port-7077"
+      port = 7077
+    },
+    {
+      name = "port-5000"
+      port = 5000
     }
   ]
 }
