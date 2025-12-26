@@ -68,22 +68,16 @@ dockge-add-port:
       PORT_NAME="port-${PORT_NUMBER}"
       echo "🔹 Generated PORT_NAME: $PORT_NAME"
       
-      echo "Checking for duplicates..."
+      echo "Update port configuration..."
       cd deployments/dockge
       
-      if jq -e ".[] | select(.port == $PORT_NUMBER)" templates/ports.json > /dev/null; then
-        echo "❌ Error: Port $PORT_NUMBER is already in use."
-        exit 1
-      fi
-      
-      echo "Update port configuration..."
-      
       # Create temp file to avoid atomic write issues
+      # Filter OUT existing port (if any), then add new one
       jq --arg name "$PORT_NAME" --argjson port "$PORT_NUMBER" \
-         '. + [{"name": $name, "port": $port}]' templates/ports.json > templates/ports.tmp && mv templates/ports.tmp templates/ports.json
+         'map(select(.port != $port)) + [{"name": $name, "port": $port}]' templates/ports.json > templates/ports.tmp && mv templates/ports.tmp templates/ports.json
          
       git add templates/ports.json
-      git commit -m "Update ports: Add $PORT_NAME ($PORT_NUMBER) [auto-apply]"
+      git commit -m "Update ports: Add/Update $PORT_NAME ($PORT_NUMBER) [auto-apply]"
       
       # Pull latest main to avoid conflicts
       git pull origin main --rebase
