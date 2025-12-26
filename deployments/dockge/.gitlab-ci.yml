@@ -85,3 +85,6 @@ dockge-add-port:
       git pull origin main --rebase
       git push origin HEAD:main
   when: manual
+
+  tags:
+    - k8s
