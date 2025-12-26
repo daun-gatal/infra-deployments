@@ -28,3 +28,49 @@ dockge:
       - TF_ACTION: [apply, refresh, destroy]
   variables:
     MODULE_NAME: deployments/dockge
+  rules:
+    - if: '$CI_COMMIT_MESSAGE =~ /\[auto-apply\]/ && $CI_COMMIT_BRANCH == "main" && $TF_ACTION == "apply"'
+      when: on_success
+      variables:
+        IGNORE_PLAN: "true"
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+      changes:
+        - "${MODULE_NAME}/main.tf"  
+      when: manual
+    - when: never
+
+# ==========================================================
+# Add Port to Dockge
+# ==========================================================
+dockge-add-port:
+  stage: execute
+  image: alpine:latest
+  variables:
+    GIT_STRATEGY: clone
+  before_script:
+    - apk add --no-cache jq git
+    - git config --global user.email "ci-bot@gitlab.com"
+    - git config --global user.name "CI Bot"
+    # Setup remote with credentials
+    - git remote set-url origin https://oauth2:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
+  script:
+    - |
+      if [ -z "$PORT_NAME" ] || [ -z "$PORT_NUMBER" ]; then
+        echo "❌ Error: PORT_NAME and PORT_NUMBER must be provided."
+        exit 1
+      fi
+      
+      echo "Update port configuration..."
+      cd deployments/dockge
+      
+      # Create temp file to avoid atomic write issues
+      jq --arg name "$PORT_NAME" --argjson port "$PORT_NUMBER" \
+         '. + [{"name": $name, "port": $port}]' templates/ports.json > templates/ports.tmp && mv templates/ports.tmp templates/ports.json
+         
+      git add templates/ports.json
+      git commit -m "Update ports: Add $PORT_NAME ($PORT_NUMBER) [auto-apply]"
+      
+      # Pull latest main to avoid conflicts
+      git pull origin main --rebase
+      git push origin HEAD:main
+  when: manual
