@@ -1,7 +1,4 @@
 variables:
-  PORT_NAME:
-    value: "port-name"
-    description: "Name of the port to add (e.g., port-8080)"
   PORT_NUMBER:
     value: "8080"
     description: "Port number to expose (e.g., 8080)"
@@ -63,10 +60,13 @@ dockge-add-port:
     - git remote set-url origin https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
   script:
     - |
-      if [ -z "$PORT_NAME" ] || [ -z "$PORT_NUMBER" ]; then
-        echo "❌ Error: PORT_NAME and PORT_NUMBER must be provided."
+      if [ -z "$PORT_NUMBER" ]; then
+        echo "❌ Error: PORT_NUMBER must be provided."
         exit 1
       fi
+      
+      PORT_NAME="port-${PORT_NUMBER}"
+      echo "🔹 Generated PORT_NAME: $PORT_NAME"
       
       echo "Checking for duplicates..."
       cd deployments/dockge
@@ -74,11 +74,6 @@ dockge-add-port:
       if jq -e ".[] | select(.port == $PORT_NUMBER)" templates/ports.json > /dev/null; then
         echo "❌ Error: Port $PORT_NUMBER is already in use."
         exit 1
-      fi
-      
-      if jq -e ".[] | select(.name == \"$PORT_NAME\")" templates/ports.json > /dev/null; then
-         echo "❌ Error: Port name '$PORT_NAME' is already in use."
-         exit 1
       fi
       
       echo "Update port configuration..."
