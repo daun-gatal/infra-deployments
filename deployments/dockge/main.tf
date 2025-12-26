@@ -6,7 +6,7 @@ module "dockge" {
 
   tailscale_funnel = false
   tailscale_expose = true
-  
+
   tailscale_app_expose = true
 
   resources = {
@@ -22,24 +22,7 @@ module "dockge" {
     }
   }
 
-  additional_ports = [
-    {
-      name = "port-8080"
-      port = 8080
-    },
-    {
-      name = "port-5432"
-      port = 5432
-    },
-    {
-      name = "port-7077"
-      port = 7077
-    },
-    {
-      name = "port-5000"
-      port = 5000
-    }
-  ]
+  additional_ports = jsondecode(file("${path.module}/templates/ports.json"))
 }
 
 # Add comments here if needed v2
