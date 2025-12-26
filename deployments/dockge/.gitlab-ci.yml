@@ -47,12 +47,18 @@ dockge-add-port:
   image: alpine:latest
   variables:
     GIT_STRATEGY: clone
+    PORT_NAME:
+      value: "port-name"
+      description: "Name of the port to add (e.g., port-8080)"
+    PORT_NUMBER:
+      value: "8080"
+      description: "Port number to expose (e.g., 8080)"
   before_script:
     - apk add --no-cache jq git
     - git config --global user.email "ci-bot@gitlab.com"
     - git config --global user.name "CI Bot"
-    # Setup remote with credentials
-    - git remote set-url origin https://oauth2:${GITLAB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
+    # Setup remote with credentials (GIT_PUSH_TOKEN is required for protected branches)
+    - git remote set-url origin https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
   script:
     - |
       if [ -z "$PORT_NAME" ] || [ -z "$PORT_NUMBER" ]; then
@@ -60,8 +66,20 @@ dockge-add-port:
         exit 1
       fi
       
-      echo "Update port configuration..."
+      echo "Checking for duplicates..."
       cd deployments/dockge
+      
+      if jq -e ".[] | select(.port == $PORT_NUMBER)" templates/ports.json > /dev/null; then
+        echo "❌ Error: Port $PORT_NUMBER is already in use."
+        exit 1
+      fi
+      
+      if jq -e ".[] | select(.name == \"$PORT_NAME\")" templates/ports.json > /dev/null; then
+         echo "❌ Error: Port name '$PORT_NAME' is already in use."
+         exit 1
+      fi
+      
+      echo "Update port configuration..."
       
       # Create temp file to avoid atomic write issues
       jq --arg name "$PORT_NAME" --argjson port "$PORT_NUMBER" \
