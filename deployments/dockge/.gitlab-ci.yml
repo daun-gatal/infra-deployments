@@ -1,3 +1,11 @@
+variables:
+  PORT_NAME:
+    value: "port-name"
+    description: "Name of the port to add (e.g., port-8080)"
+  PORT_NUMBER:
+    value: "8080"
+    description: "Port number to expose (e.g., 8080)"
+
 include:
   - local: 'ci-templates/deploy-build.yml'
 
@@ -47,12 +55,6 @@ dockge-add-port:
   image: alpine:latest
   variables:
     GIT_STRATEGY: clone
-    PORT_NAME:
-      value: "port-name"
-      description: "Name of the port to add (e.g., port-8080)"
-    PORT_NUMBER:
-      value: "8080"
-      description: "Port number to expose (e.g., 8080)"
   before_script:
     - apk add --no-cache jq git
     - git config --global user.email "ci-bot@gitlab.com"
