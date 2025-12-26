@@ -16,8 +16,7 @@ module "trino" {
 
   trino_shared_secret   = var.trino_shared_secret
   worker_count          = 1
-  coordinator_as_worker = true
-  tailscale_expose      = false
+  coordinator_as_worker = false
   enabled_catalogs = [
     {
       name = "datalake"
@@ -93,4 +92,4 @@ module "trino" {
   }
 }
 
-# Add comments v9
+# Add comments v10
