@@ -8,6 +8,12 @@ set -euo pipefail
 : "${CI_PROJECT_ID:?CI_PROJECT_ID is required}"
 : "${CI_COMMIT_SHA:?CI_COMMIT_SHA is required}"
 : "${MODULE_NAME:?MODULE_NAME is required}"
+IGNORE_PLAN="${IGNORE_PLAN:-false}"
+
+if [ "${IGNORE_PLAN}" = "true" ]; then
+  echo "⏩ IGNORE_PLAN is set. Skipping MR artifact download."
+  exit 0
+fi
 
 # Job naming
 STATE_NAME=$(basename ${MODULE_NAME})
