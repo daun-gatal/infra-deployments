@@ -26,6 +26,10 @@ module "dockge" {
     {
       name = "port-8080"
       port = 8080
+    },
+    {
+      name = "port-5432"
+      port = 5432
     }
   ]
 }
