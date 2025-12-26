@@ -77,7 +77,9 @@ dockge-add-port:
          'map(select(.port != $port)) + [{"name": $name, "port": $port}]' templates/ports.json > templates/ports.tmp && mv templates/ports.tmp templates/ports.json
          
       git add templates/ports.json
-      git commit -m "Update ports: Add/Update $PORT_NAME ($PORT_NUMBER) [auto-apply]"
+      
+      # Force commit even if no changes, to trigger the pipeline (as requested)
+      git commit --allow-empty -m "Update ports: Add/Update $PORT_NAME ($PORT_NUMBER) [auto-apply]"
       
       # Pull latest main to avoid conflicts
       git pull origin main --rebase
