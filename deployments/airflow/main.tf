@@ -53,6 +53,12 @@ module "airflow" {
   airflow_api_server_config = local.oauth_config
 
   values = {
+    config = {
+      core = {
+        dags_folder = "/opt/airflow/dags/repo/dags"
+      }
+    }
+
     securityContexts = {
       pod = {
         runAsUser  = 50000
