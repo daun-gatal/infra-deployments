@@ -1,7 +1,7 @@
 variables:
-  PORT_NUMBER:
+  PORT_NUMBERS:
     value: "8080"
-    description: "Port number to expose (e.g., 8080)"
+    description: "Port number to expose (e.g., 8080). Comma separated list of ports."
 
 include:
   - local: 'ci-templates/deploy-build.yml'
@@ -60,26 +60,27 @@ dockge-add-port:
     - git remote set-url origin https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git
   script:
     - |
-      if [ -z "$PORT_NUMBER" ]; then
-        echo "❌ Error: PORT_NUMBER must be provided."
+      if [ -z "$PORT_NUMBERS" ]; then
+        echo "❌ Error: PORT_NUMBERS must be provided."
         exit 1
       fi
       
-      PORT_NAME="port-${PORT_NUMBER}"
-      echo "🔹 Generated PORT_NAME: $PORT_NAME"
-      
-      echo "Update port configuration..."
+      echo "Update port configuration with: $PORT_NUMBERS"
       cd deployments/dockge
       
       # Create temp file to avoid atomic write issues
       # Filter OUT existing port (if any), then add new one
-      jq --arg name "$PORT_NAME" --argjson port "$PORT_NUMBER" \
-         'map(select(.port != $port)) + [{"name": $name, "port": $port}]' templates/ports.json > templates/ports.tmp && mv templates/ports.tmp templates/ports.json
+      jq --arg ports "$PORT_NUMBERS" '
+        ($ports | split(",") | map(gsub("^\\s+|\\s+$"; "") | select(length > 0) | tonumber)) as $new_ports |
+        reduce $new_ports[] as $p (.; 
+          map(select(.port != $p)) + [{"name": ("port-" + ($p|tostring)), "port": $p}]
+        )
+      ' templates/ports.json > templates/ports.tmp && mv templates/ports.tmp templates/ports.json
          
       git add templates/ports.json
       
       # Force commit even if no changes, to trigger the pipeline (as requested)
-      git commit --allow-empty -m "Update ports: Add/Update $PORT_NAME ($PORT_NUMBER) [auto-apply]"
+      git commit --allow-empty -m "Update ports: $PORT_NUMBERS [auto-apply]"
       
       # Pull latest main to avoid conflicts
       git pull origin main --rebase
