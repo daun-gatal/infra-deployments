@@ -104,7 +104,7 @@ jobs:
     - name: Generate tfvars
       run: |
         if [ -f .tf.env ]; then
-           envsubst < .tf.env > "${MODULE_NAME}/.tfvars"
+           python3 -c 'import os, sys; print(os.path.expandvars(sys.stdin.read()))' < .tf.env > "${MODULE_NAME}/.tfvars"
         else
            echo "⚠️ .tf.env not found!"
         fi
