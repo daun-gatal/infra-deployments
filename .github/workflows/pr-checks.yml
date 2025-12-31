@@ -122,4 +122,4 @@ jobs:
     - name: Terraform Plan
       run: |
         cd ${MODULE_NAME}
-        terraform plan -var-file=.tfvars -compact-warnings -out=tfplan
+        terraform plan -var-file=.tfvars -compact-warnings
