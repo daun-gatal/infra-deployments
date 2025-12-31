@@ -71,10 +71,14 @@ jobs:
       with:
         tflint_version: "latest"
         
-    - name: Setup Trivy
+    - name: Run Trivy
       uses: aquasecurity/trivy-action@master
       with:
-        install-only: true
+        scan-type: 'config'
+        scan-ref: '${{ env.MODULE_NAME }}'
+        severity: 'HIGH,CRITICAL'
+        exit-code: '1'
+
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
@@ -108,10 +112,7 @@ jobs:
       run: |
         tflint --config=.tflint.hcl
 
-    - name: Run Trivy
-      run: |
-        cd ${MODULE_NAME}
-        trivy config . --severity HIGH,CRITICAL --exit-code 1
+
 
     - name: Generate tfvars
       run: |
