@@ -39,7 +39,6 @@ on:
 jobs:
   execute:
     runs-on: [self-hosted, k8s]
-    environment: production
     env:
       MODULE_NAME: deployments/${{ inputs.module }}
       TF_ACTION: ${{ inputs.action }}
@@ -90,6 +89,7 @@ jobs:
         oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
         tags: tag:git
+        args: --tun=userspace-networking --accept-routes
 
     - name: Write Kubeconfig
       run: |
