@@ -1,0 +1,140 @@
+name: Deploy Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        description: 'Module to operate on'
+        required: true
+        type: choice
+        options:
+        - database
+        - minio
+        - kafka
+        - trino
+        - airflow
+        - openbao
+        - superset
+        - keycloak
+        - dockge
+      action:
+        description: 'Terraform Action'
+        required: true
+        type: choice
+        default: 'apply'
+        options:
+        - apply
+        - refresh
+        - destroy
+  workflow_call:
+    inputs:
+      module:
+        required: true
+        type: string
+      action:
+        required: true
+        type: string
+
+
+jobs:
+  execute:
+    runs-on: [self-hosted, k8s]
+    env:
+      MODULE_NAME: deployments/${{ inputs.module }}
+      TF_ACTION: ${{ inputs.action }}
+
+      TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
+      TAILSCALE_SERVER: ${{ secrets.TAILSCALE_SERVER }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      OUTPUT_DIR: "/opt/terraform-outputs"
+      
+      # Secrets for .tf.env substitution
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_INTERNAL_DNS: ${{ secrets.DB_INTERNAL_DNS }}
+      MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+      MINIO_USER: ${{ secrets.MINIO_USER }}
+      MINIO_INTERNAL_DNS: ${{ secrets.MINIO_INTERNAL_DNS }}
+      TRINO_SHARED_SECRET: ${{ secrets.TRINO_SHARED_SECRET }}
+      AIRFLOW_FERNET_KEY: ${{ secrets.AIRFLOW_FERNET_KEY }}
+      AIRFLOW_API_SECRET_KEY: ${{ secrets.AIRFLOW_API_SECRET_KEY }}
+      AIRFLOW_PASSWORD: ${{ secrets.AIRFLOW_PASSWORD }}
+      AIRFLOW_GIT_USERNAME: ${{ secrets.AIRFLOW_GIT_USERNAME }}
+      AIRFLOW_GIT_PASSWORD: ${{ secrets.AIRFLOW_GIT_PASSWORD }}
+      SUPERSET_SECRET_KEY: ${{ secrets.SUPERSET_SECRET_KEY }}
+      SUPERSET_ADMIN_PASSWORD: ${{ secrets.SUPERSET_ADMIN_PASSWORD }}
+      SUPERSET_GITHUB_CLIENT_ID: ${{ secrets.SUPERSET_GITHUB_CLIENT_ID }}
+      SUPERSET_GITHUB_CLIENT_SECRET: ${{ secrets.SUPERSET_GITHUB_CLIENT_SECRET }}
+      OPENBAO_CURRENT_KEY: ${{ secrets.OPENBAO_CURRENT_KEY }}
+      OPENBAO_CURRENT_KEY_ID: ${{ secrets.OPENBAO_CURRENT_KEY_ID }}
+      OPENBAO_PREVIOUS_KEY: ${{ secrets.OPENBAO_PREVIOUS_KEY }}
+      OPENBAO_PREVIOUS_KEY_ID: ${{ secrets.OPENBAO_PREVIOUS_KEY_ID }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+    - name: Setup Tailscale
+      uses: tailscale/github-action@v2
+      with:
+        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+        tags: tag:git
+
+
+
+    - name: Write Kubeconfig
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+        chmod 600 kubeconfig
+        echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
+
+    - name: Terraform Init
+      run: |
+        cd ${MODULE_NAME}
+        terraform init -upgrade
+
+    - name: Generate tfvars
+      run: |
+        if [ -f .tf.env ]; then
+           envsubst < .tf.env > "${MODULE_NAME}/.tfvars"
+        else
+           echo "⚠️ .tf.env not found!"
+        fi
+
+    - name: Execute Action
+      run: |
+        cd ${MODULE_NAME}
+        
+        push_outputs() {
+          terraform output -json > outputs.json
+          # Use Tailscale SSH to push outputs
+          # Needs pre-authorized Tailscale or key access
+          # Assuming runner is connected via setup-tailscale action
+          tailscale ssh -o StrictHostKeyChecking=no root@"${TAILSCALE_SERVER}" -- "mkdir -p ${OUTPUT_DIR}/${MODULE_NAME} && cat > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json" < outputs.json
+        }
+
+        case "${TF_ACTION}" in
+          apply)
+            echo "▶ Applying..."
+            terraform apply -auto-approve -compact-warnings -var-file=.tfvars
+            push_outputs
+            ;;
+          refresh)
+            echo "▶ Refreshing..."
+            terraform apply -refresh-only -auto-approve -compact-warnings -var-file=.tfvars
+            ;;
+          destroy)
+            echo "▶ Destroying..."
+            terraform destroy -auto-approve -compact-warnings -var-file=.tfvars
+            ;;
+        esac

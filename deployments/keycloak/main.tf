@@ -1,5 +1,5 @@
 module "keycloak" {
-  source = "git::https://gitlab.com/daun-gatal/terraform-modules.git//modules/keycloak?ref=main"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/keycloak?ref=main"
 
   db_host = var.db_internal_dns
 

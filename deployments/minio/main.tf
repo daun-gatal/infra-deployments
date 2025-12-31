@@ -1,5 +1,5 @@
 module "minio" {
-  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/minio?ref=main"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/minio?ref=main"
 
   minio_root_password = var.minio_root_password
   tailscale_expose    = true
