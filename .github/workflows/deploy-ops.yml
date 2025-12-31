@@ -92,9 +92,10 @@ jobs:
 
     - name: Write Kubeconfig
       run: |
-        echo "${{ secrets.KUBECONFIG }}" > kubeconfig
-        chmod 600 kubeconfig
-        echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+        chmod 600 ~/.kube/config
+        echo "KUBECONFIG=~/.kube/config" >> $GITHUB_ENV
 
     - name: Terraform Init
       run: |
