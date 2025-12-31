@@ -9,7 +9,7 @@ module "airflow" {
   source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/airflow?ref=main"
 
 
-  image_repository = "registry.gitlab.com/daun-gatal/image-repo/airflow"
+  image_repository = "ghcr.io/daun-gatal/image-repo/airflow"
   image_tag        = "3.1.5"
   namespace        = "airflow"
 
@@ -30,7 +30,7 @@ module "airflow" {
   git_auth_method              = "pat"
   git_username                 = var.git_username
   git_password                 = var.git_password
-  airflow_dags_git_sync_repo   = "https://gitlab.com/daun-gatal/airflow-dags.git"
+  airflow_dags_git_sync_repo   = "https://github.com/daun-gatal/airflow-dags.git"
   airflow_dags_git_sync_branch = "main"
 
   # Connect to MinIO for remote logging
