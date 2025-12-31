@@ -85,12 +85,9 @@ jobs:
       with:
         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-
-
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Configure Git Credentials
+      run: |
+        git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
     - name: Write Kubeconfig
       run: |
@@ -111,8 +108,6 @@ jobs:
     - name: Run TFLint
       run: |
         tflint --config=.tflint.hcl
-
-
 
     - name: Generate tfvars
       run: |
