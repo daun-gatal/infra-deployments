@@ -88,13 +88,13 @@ jobs:
         
         if ! command -v tailscaled &> /dev/null; then
             echo "tailscaled not found, installing..."
-            curl -fsSL https://tailscale.com/install.sh | sh > /dev/null 2>&1
+            curl -fsSL https://tailscale.com/install.sh | sh
         fi
         
         tailscaled \
           --tun=userspace-networking \
           --state=mem: \
-          --socket=/var/run/tailscale/tailscaled.sock > /dev/null 2>&1 &
+          --socket=/var/run/tailscale/tailscaled.sock &
         
         sleep 5
         
@@ -106,7 +106,7 @@ jobs:
           --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" \
           --accept-routes \
           --hostname="$TAIL_HOST" \
-          --advertise-tags=tag:git > /dev/null 2>&1
+          --advertise-tags=tag:git
 
     - name: Write Kubeconfig
       run: |
