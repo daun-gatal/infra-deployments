@@ -42,11 +42,6 @@ jobs:
     env:
       MODULE_NAME: deployments/${{ inputs.module }}
       TF_ACTION: ${{ inputs.action }}
-
-      TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
-      TAILSCALE_SERVER: ${{ secrets.TAILSCALE_SERVER }}
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      OUTPUT_DIR: "/opt/terraform-outputs"
       
       # Secrets for .tf.env substitution
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -86,20 +81,20 @@ jobs:
     - name: Setup Tailscale
       id: tailscale
       env:
-        TAILSCALE_AUTH_KEY: ${{ secrets.TS_OAUTH_SECRET }}
+        TAILSCALE_AUTH_KEY: ${{ secrets.TAILSCALE_AUTH_KEY }}
       run: |
         echo "🟦 Starting Tailscale..."
         mkdir -p /var/run/tailscale
         
         if ! command -v tailscaled &> /dev/null; then
             echo "tailscaled not found, installing..."
-            curl -fsSL https://tailscale.com/install.sh | sh
+            curl -fsSL https://tailscale.com/install.sh | sh > /dev/null 2>&1
         fi
         
         tailscaled \
           --tun=userspace-networking \
           --state=mem: \
-          --socket=/var/run/tailscale/tailscaled.sock &
+          --socket=/var/run/tailscale/tailscaled.sock > /dev/null 2>&1 &
         
         sleep 5
         
@@ -111,7 +106,7 @@ jobs:
           --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" \
           --accept-routes \
           --hostname="$TAIL_HOST" \
-          --advertise-tags=tag:git
+          --advertise-tags=tag:git > /dev/null 2>&1
 
     - name: Write Kubeconfig
       run: |
@@ -137,19 +132,10 @@ jobs:
       run: |
         cd ${MODULE_NAME}
         
-        push_outputs() {
-          terraform output -json > outputs.json
-          # Use Tailscale SSH to push outputs
-          # Needs pre-authorized Tailscale or key access
-          # Assuming runner is connected via setup-tailscale action
-          tailscale ssh -o StrictHostKeyChecking=no root@"${TAILSCALE_SERVER}" -- "mkdir -p ${OUTPUT_DIR}/${MODULE_NAME} && cat > ${OUTPUT_DIR}/${MODULE_NAME}/outputs.json" < outputs.json
-        }
-
         case "${TF_ACTION}" in
           apply)
             echo "▶ Applying..."
             terraform apply -auto-approve -compact-warnings -var-file=.tfvars
-            push_outputs
             ;;
           refresh)
             echo "▶ Refreshing..."
