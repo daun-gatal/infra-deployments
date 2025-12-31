@@ -1,0 +1,44 @@
+name: CI Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'deployments/**'
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: [self-hosted, k8s]
+    outputs:
+      modules: ${{ steps.filter.outputs.changes }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          database: 'deployments/database/**'
+          minio: 'deployments/minio/**'
+          kafka: 'deployments/kafka/**'
+          trino: 'deployments/trino/**'
+          airflow: 'deployments/airflow/**'
+          openbao: 'deployments/openbao/**'
+          superset: 'deployments/superset/**'
+          keycloak: 'deployments/keycloak/**'
+          dockge: 'deployments/dockge/**'
+
+  deploy:
+    needs: changes
+    if: ${{ needs.changes.outputs.modules != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.changes.outputs.modules) }}
+    uses: ./.github/workflows/deploy-ops.yml
+    with:
+      module: ${{ matrix.module }}
+      action: 'apply'
+    secrets: inherit
