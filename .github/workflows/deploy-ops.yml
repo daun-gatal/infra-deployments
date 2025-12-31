@@ -84,12 +84,11 @@ jobs:
         git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
     - name: Setup Tailscale
-      uses: tailscale/github-action@v2
+      uses: tailscale/github-action@v4
       with:
         oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
         tags: tag:git
-        args: --tun=userspace-networking --accept-routes
 
     - name: Write Kubeconfig
       run: |
