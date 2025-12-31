@@ -84,6 +84,7 @@ jobs:
         git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
     - name: Setup Tailscale
+      id: tailscale
       env:
         TAILSCALE_AUTH_KEY: ${{ secrets.TS_OAUTH_SECRET }}
       run: |
@@ -159,3 +160,9 @@ jobs:
             terraform destroy -auto-approve -compact-warnings -var-file=.tfvars
             ;;
         esac
+
+    - name: Tailscale Logout
+      if: always() && steps.tailscale.conclusion == 'success'
+      run: |
+        echo "👋 Logging out from Tailscale..."
+        tailscale logout
