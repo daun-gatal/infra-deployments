@@ -4,6 +4,7 @@ terraform {
 
     workspaces {
       name = "infra-deployments-dockge"
+      project = "infra-deployments"
     }
   }
 }

@@ -4,6 +4,7 @@ terraform {
 
     workspaces {
       name = "infra-deployments-minio"
+      project = "infra-deployments"
     }
   }
 }
