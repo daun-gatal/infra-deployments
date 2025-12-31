@@ -46,7 +46,7 @@ module "connect_new" {
   kafka_connect_instances = {
     connect = {
       replicas                                  = 1
-      image                                     = "registry.gitlab.com/daun-gatal/image-repo/cp-kafka-connect:8.0.1"
+      image                                     = "ghcr.io/daun-gatal/image-repo/cp-kafka-connect:8.0.1"
       kafka_connect_name                        = "kafka-connect"
       kafka_bootstrap_servers                   = [module.cluster.kafka_int_bootstrap_servers]
       schema_registry_url                       = "http://${module.schema_registry_new.schema_registry_internal_dns}:${module.schema_registry_new.schema_registry_port}"
@@ -58,7 +58,7 @@ module "connect_new" {
 
     connect-replica = {
       replicas                                  = 1
-      image                                     = "registry.gitlab.com/daun-gatal/image-repo/cp-kafka-connect:8.0.1"
+      image                                     = "ghcr.io/daun-gatal/image-repo/cp-kafka-connect:8.0.1"
       kafka_connect_name                        = "kafka-connect-replica"
       kafka_bootstrap_servers                   = [module.cluster.kafka_int_bootstrap_servers]
       schema_registry_url                       = "http://${module.schema_registry_new.schema_registry_internal_dns}:${module.schema_registry_new.schema_registry_port}"
