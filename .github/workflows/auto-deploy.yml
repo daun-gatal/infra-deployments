@@ -1,0 +1,16 @@
+name: Auto Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'deployments/dockge/**'
+
+jobs:
+  auto-apply:
+    if: contains(github.event.head_commit.message, '[auto-apply]')
+    uses: ./.github/workflows/deploy-ops.yml
+    with:
+      module: 'dockge'
+      action: 'apply'
+    secrets: inherit

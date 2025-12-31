@@ -1,0 +1,125 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  changes:
+    runs-on: [self-hosted, k8s]
+    outputs:
+      modules: ${{ steps.filter.outputs.changes }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          database: 'deployments/database/**'
+          minio: 'deployments/minio/**'
+          kafka: 'deployments/kafka/**'
+          trino: 'deployments/trino/**'
+          airflow: 'deployments/airflow/**'
+          openbao: 'deployments/openbao/**'
+          superset: 'deployments/superset/**'
+          keycloak: 'deployments/keycloak/**'
+          dockge: 'deployments/dockge/**'
+
+  validate-plan:
+    needs: changes
+    if: ${{ needs.changes.outputs.modules != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.changes.outputs.modules) }}
+    runs-on: [self-hosted, k8s]
+    env:
+      MODULE_NAME: deployments/${{ matrix.module }}
+
+      
+      # Secrets for .tf.env substitution
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_INTERNAL_DNS: ${{ secrets.DB_INTERNAL_DNS }}
+      MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+      MINIO_USER: ${{ secrets.MINIO_USER }}
+      MINIO_INTERNAL_DNS: ${{ secrets.MINIO_INTERNAL_DNS }}
+      TRINO_SHARED_SECRET: ${{ secrets.TRINO_SHARED_SECRET }}
+      AIRFLOW_FERNET_KEY: ${{ secrets.AIRFLOW_FERNET_KEY }}
+      AIRFLOW_API_SECRET_KEY: ${{ secrets.AIRFLOW_API_SECRET_KEY }}
+      AIRFLOW_PASSWORD: ${{ secrets.AIRFLOW_PASSWORD }}
+      AIRFLOW_GIT_USERNAME: ${{ secrets.AIRFLOW_GIT_USERNAME }}
+      AIRFLOW_GIT_PASSWORD: ${{ secrets.AIRFLOW_GIT_PASSWORD }}
+      SUPERSET_SECRET_KEY: ${{ secrets.SUPERSET_SECRET_KEY }}
+      SUPERSET_ADMIN_PASSWORD: ${{ secrets.SUPERSET_ADMIN_PASSWORD }}
+      SUPERSET_GITHUB_CLIENT_ID: ${{ secrets.SUPERSET_GITHUB_CLIENT_ID }}
+      SUPERSET_GITHUB_CLIENT_SECRET: ${{ secrets.SUPERSET_GITHUB_CLIENT_SECRET }}
+      OPENBAO_CURRENT_KEY: ${{ secrets.OPENBAO_CURRENT_KEY }}
+      OPENBAO_CURRENT_KEY_ID: ${{ secrets.OPENBAO_CURRENT_KEY_ID }}
+      OPENBAO_PREVIOUS_KEY: ${{ secrets.OPENBAO_PREVIOUS_KEY }}
+      OPENBAO_PREVIOUS_KEY_ID: ${{ secrets.OPENBAO_PREVIOUS_KEY_ID }}
+      
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup TFLint
+      uses: terraform-linters/setup-tflint@v3
+      with:
+        tflint_version: "latest"
+        
+    - name: Run Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'config'
+        scan-ref: '${{ env.MODULE_NAME }}'
+        severity: 'HIGH,CRITICAL'
+        exit-code: '1'
+
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+        cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+    - name: Configure Git Credentials
+      run: |
+        git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+    - name: Write Kubeconfig
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+        chmod 600 ~/.kube/config
+        echo "KUBECONFIG=~/.kube/config" >> $GITHUB_ENV
+
+    - name: Terraform Init
+      run: |
+        cd ${MODULE_NAME}
+        terraform init -upgrade
+
+    - name: Terraform Validate
+      run: |
+        cd ${MODULE_NAME}
+        terraform validate
+
+    - name: Run TFLint
+      run: |
+        tflint --config=.tflint.hcl
+
+    - name: Generate tfvars
+      run: |
+        if [ -f .tf.env ]; then
+           python3 -c 'import os, sys; print(os.path.expandvars(sys.stdin.read()))' < .tf.env > "${MODULE_NAME}/.tfvars"
+        else
+           echo "⚠️ .tf.env not found!"
+        fi
+
+    - name: Terraform Plan
+      run: |
+        cd ${MODULE_NAME}
+        terraform plan -var-file=.tfvars -compact-warnings

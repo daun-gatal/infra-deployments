@@ -1,0 +1,50 @@
+name: Dockge Port Operations
+
+on:
+  workflow_dispatch:
+    inputs:
+      port_numbers:
+        description: 'Port numbers (comma separated)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  add-port:
+    runs-on: [self-hosted, k8s]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
+
+    - name: Add Ports
+      env:
+        PORT_NUMBERS: ${{ inputs.port_numbers }}
+      run: |
+        if [ -z "$PORT_NUMBERS" ]; then
+          echo "❌ Error: PORT_NUMBERS must be provided."
+          exit 1
+        fi
+        
+        echo "Update port configuration with: $PORT_NUMBERS"
+        cd deployments/dockge
+        
+        # jq logic from original script
+        jq --arg ports "$PORT_NUMBERS" '
+          ($ports | split(",") | map(gsub("^\\s+|\\s+$"; "") | select(length > 0) | tonumber)) as $new_ports |
+          reduce $new_ports[] as $p (.; 
+            map(select(.port != $p)) + [{"name": ("port-" + ($p|tostring)), "port": $p}]
+          )
+        ' templates/ports.json > templates/ports.tmp && mv templates/ports.tmp templates/ports.json
+        
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        git add templates/ports.json
+        
+        # Commit with [auto-apply] to trigger auto-deploy if enabled
+        git commit -m "Update ports: $PORT_NUMBERS [auto-apply]"
+        git push

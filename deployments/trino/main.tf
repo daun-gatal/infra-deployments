@@ -12,7 +12,7 @@ locals {
 
 
 module "trino" {
-  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/trino?ref=main"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/trino?ref=main"
 
   trino_shared_secret   = var.trino_shared_secret
   worker_count          = 1

@@ -12,7 +12,7 @@ locals {
 
 
 module "superset" {
-  source = "git::ssh://git@gitlab.com/daun-gatal/terraform-modules.git//modules/superset?ref=main"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/superset?ref=main"
 
   admin_password        = var.admin_password
   oauth_config          = local.oauth_config

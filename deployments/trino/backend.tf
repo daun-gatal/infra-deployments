@@ -1,3 +1,10 @@
 terraform {
-  backend "http" {}
+  cloud {
+    organization = "daun-gatal"
+
+    workspaces {
+      name = "infra-deployments-trino"
+      project = "infra-deployments"
+    }
+  }
 }
