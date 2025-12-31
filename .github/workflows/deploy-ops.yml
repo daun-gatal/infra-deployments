@@ -84,12 +84,34 @@ jobs:
         git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
     - name: Setup Tailscale
-      uses: tailscale/github-action@v4
-      with:
-        oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-        oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-        tags: tag:git
-        version: latest
+      id: tailscale
+      env:
+        TAILSCALE_AUTH_KEY: ${{ secrets.TS_OAUTH_SECRET }}
+      run: |
+        echo "🟦 Starting Tailscale..."
+        mkdir -p /var/run/tailscale
+        
+        if ! command -v tailscaled &> /dev/null; then
+            echo "tailscaled not found, installing..."
+            curl -fsSL https://tailscale.com/install.sh | sh
+        fi
+        
+        tailscaled \
+          --tun=userspace-networking \
+          --state=mem: \
+          --socket=/var/run/tailscale/tailscaled.sock &
+        
+        sleep 5
+        
+        STATE_NAME=$(basename ${MODULE_NAME})
+        SUFFIX=$(head /dev/urandom | tr -dc a-z0-9 | head -c6 || echo "random")
+        TAIL_HOST="gh-runner-${STATE_NAME}-${SUFFIX}"
+        
+        tailscale up \
+          --auth-key="${TAILSCALE_AUTH_KEY}?preauthorized=true" \
+          --accept-routes \
+          --hostname="$TAIL_HOST" \
+          --advertise-tags=tag:git
 
     - name: Write Kubeconfig
       run: |
@@ -138,3 +160,9 @@ jobs:
             terraform destroy -auto-approve -compact-warnings -var-file=.tfvars
             ;;
         esac
+
+    - name: Tailscale Logout
+      if: always() && steps.tailscale.conclusion == 'success'
+      run: |
+        echo "👋 Logging out from Tailscale..."
+        tailscale logout
