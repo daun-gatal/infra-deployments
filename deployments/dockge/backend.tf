@@ -1,10 +1,7 @@
 terraform {
-  cloud {
-    organization = "daun-gatal"
-
-    workspaces {
-      name = "infra-deployments-dockge"
-      project = "infra-deployments"
-    }
+  backend "kubernetes" {
+    secret_suffix    = "dockge"
+    config_path      = "~/.kube/config"
+    namespace        = "terraform"
   }
 }
