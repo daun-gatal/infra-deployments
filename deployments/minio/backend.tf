@@ -1,10 +1,7 @@
 terraform {
-  cloud {
-    organization = "daun-gatal"
-
-    workspaces {
-      name = "infra-deployments-minio"
-      project = "infra-deployments"
-    }
+  backend "kubernetes" {
+    secret_suffix    = "minio"
+    config_path      = "~/.kube/config"
+    namespace        = "terraform"
   }
 }

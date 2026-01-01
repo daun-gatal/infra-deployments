@@ -1,10 +1,7 @@
 terraform {
-  cloud {
-    organization = "daun-gatal"
-
-    workspaces {
-      name = "infra-deployments-kafka"
-      project = "infra-deployments"
-    }
+  backend "kubernetes" {
+    secret_suffix    = "kafka"
+    config_path      = "~/.kube/config"
+    namespace        = "terraform"
   }
 }

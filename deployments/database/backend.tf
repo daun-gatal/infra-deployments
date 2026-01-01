@@ -1,10 +1,7 @@
 terraform {
-  cloud {
-    organization = "daun-gatal"
-
-    workspaces {
-      name = "infra-deployments-database"
-      project = "infra-deployments"
-    }
+  backend "kubernetes" {
+    secret_suffix    = "database"
+    config_path      = "~/.kube/config"
+    namespace        = "terraform"
   }
 }
