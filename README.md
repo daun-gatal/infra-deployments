@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository hosts the **Infrastructure as Code (IaC)** for a modern, scalable data platform. It leverages **Terraform** for provisioning and **GitLab CI** for automated, multi-stage deployment pipelines. The infrastructure is designed to be modular, reliable, and strictly version-controlled, enabling consistent environments from development to production.
+This repository hosts the **Infrastructure as Code (IaC)** for a modern, scalable data platform. It leverages **Terraform** for provisioning and **GitHub Actions** for automated, multi-stage deployment pipelines. The infrastructure is designed to be modular, reliable, and strictly version-controlled, enabling consistent environments from development to production.
 
 The core objective of this project is to deploy and manage a suite of distributed data engineering and observability tools on top of Kubernetes.
 
@@ -50,9 +50,9 @@ graph TD
 -   **Containerization**: [Docker](https://www.docker.com/) - Used for building custom images and running services.
 
 ### CI/CD
--   **GitLab CI/CD**: Powering the automation pipeline.
-    -   **Dynamic Child Pipelines**: Used to trigger specific deployment jobs only when relevant files change.
-    -   **Terraform Automation**: Custom runner images and scripts to handle `init`, `validate`, `plan`, and `apply` stages safely.
+-   **GitHub Actions**: Powering the automation pipeline.
+    -   **Workflow Dispatch**: Used to trigger specific deployment jobs.
+    -   **Terraform Automation**: Custom workflows and scripts to handle `init`, `validate`, `plan`, and `apply` stages safely.
 
 ## 🛠️ Deployed Services
 
@@ -73,7 +73,8 @@ This repository manages the deployment of the following key components:
 
 ```plaintext
 .
-├── ci-templates/   # Reusable GitLab CI configuration snippets
+├── .github/        # GitHub configuration including workflows
+│   └── workflows/  # GitHub Actions workflows
 ├── deployments/    # Terraform configurations for each service (the heart of the repo)
 │   ├── airflow/
 │   ├── database/
@@ -83,9 +84,6 @@ This repository manages the deployment of the following key components:
 │   ├── openbao/
 │   ├── superset/
 │   └── trino/
-├── docker/         # Dockerfiles for custom CI runner images
-├── scripts/        # Helper scripts for automation and maintenance
-└── .gitlab-ci.yml  # Main CI entry point
 ```
 
 ## 🔄 CI/CD Workflow
@@ -94,14 +92,14 @@ The deployment pipeline follows a rigorous process to ensure stability:
 
 ```mermaid
 graph LR
-    Push[Git Push / MR] --> GitLab{GitLab CI}
+    Push[Git Push / MR] --> GitHub{GitHub Actions}
     
-    GitLab -->|Changes in docker/| Build(Build Runner Image)
+    GitHub -->|Changes in docker/| Build(Build Runner Image)
     
-    GitLab -->|Changes in deployments/*| ChildPipeline[Trigger Child Pipeline]
+    GitHub -->|Changes in deployments/*| Workflow[Trigger Workflow]
     
     subgraph Terraform_Workflow
-        ChildPipeline --> Validate(Terraform Validate)
+        Workflow --> Validate(Terraform Validate)
         Validate --> Plan(Terraform Plan)
         Plan -->|Artifact| Review[Manual Review]
         Review -->|Approval| Apply(Terraform Apply)
