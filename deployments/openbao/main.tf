@@ -1,5 +1,5 @@
 module "openbao" {
-  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/openbao?ref=main"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/openbao?ref=v0.2.4"
 
   tailscale_ui_expose = true
   generate_unseal_key = false

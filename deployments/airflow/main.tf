@@ -6,7 +6,7 @@ locals {
 }
 
 module "airflow" {
-  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/airflow?ref=main"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/airflow?ref=v0.2.4"
 
 
   image_repository = "ghcr.io/daun-gatal/image-repo/airflow"
