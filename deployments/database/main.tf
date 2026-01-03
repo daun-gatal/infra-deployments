@@ -1,5 +1,5 @@
 module "postgres_db" {
-  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/postgres?ref=main"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/postgres?ref=v0.2.4"
 
   db_name        = "default"
   db_user        = "admin"

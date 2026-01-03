@@ -1,5 +1,5 @@
 module "dockge" {
-  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/dockge?ref=main"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/dockge?ref=v0.2.4"
 
   namespace    = "dockge"
   service_port = 80
