@@ -17,6 +17,7 @@ on:
         - superset
         - keycloak
         - dockge
+        - hms
       action:
         description: 'Terraform Action'
         required: true
