@@ -28,6 +28,7 @@ jobs:
           superset: 'deployments/superset/**'
           keycloak: 'deployments/keycloak/**'
           dockge: 'deployments/dockge/**'
+          hms: 'deployments/hms/**'
 
   validate-plan:
     needs: changes

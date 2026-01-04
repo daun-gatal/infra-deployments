@@ -28,6 +28,7 @@ graph TD
         
         Trino -->|Query| MinIO[(MinIO S3)]
         Trino -->|Query| Kafka(Apache Kafka)
+        Trino -->|Metadata| HMS(Hive Metastore)
         
         Airflow -->|ETL Jobs| MinIO
     end
@@ -38,7 +39,7 @@ graph TD
         Superset -->|Metadata| Postgres
         Airflow -->|Metadata| Postgres
         Keycloak -->|Identity Data| Postgres
-        Trino -.->|Metastore| Postgres
+        HMS -->|Metadata| Postgres
     end
 ```
 
@@ -62,6 +63,7 @@ This repository manages the deployment of the following key components:
 | :--- | :--- | :--- |
 | **[Apache Airflow](https://airflow.apache.org/)** | Orchestration | Platform to programmatically author, schedule, and monitor workflows. |
 | **[Trino](https://trino.io/)** | Query Engine | Distributed SQL query engine for big data analytics. |
+| **[Hive Metastore](https://hive.apache.org/)** | Metadata | Central repository of metadata for tables stored in a data lake. |
 | **[Apache Superset](https://superset.apache.org/)** | Visualization | Modern data exploration and visualization platform. |
 | **[Keycloak](https://www.keycloak.org/)** | Security | Open Source Identity and Access Management (IAM) for modern applications. |
 | **[Apache Kafka](https://kafka.apache.org/)** | Streaming | Distributed event streaming platform for high-performance data pipelines. |
@@ -78,6 +80,7 @@ This repository manages the deployment of the following key components:
 ├── deployments/    # Terraform configurations for each service (the heart of the repo)
 │   ├── airflow/
 │   ├── database/
+│   ├── hms/
 │   ├── kafka/
 │   ├── keycloak/
 │   ├── minio/
