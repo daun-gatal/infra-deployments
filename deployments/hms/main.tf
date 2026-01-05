@@ -1,5 +1,7 @@
 module "hms" {
-  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/hms?ref=v0.4.0"
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/hms?ref=0.5.0"
+
+  image_tag = "3.1.3"
 
   database_host     = var.db_internal_dns
   database_user     = var.db_user
