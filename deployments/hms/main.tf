@@ -10,6 +10,10 @@ module "hms" {
   s3_access_key = var.minio_root_user
   s3_secret_key = var.minio_root_password
   s3_endpoint   = "http://${var.minio_internal_dns}:9000"
+
+  extra_env_vars = {
+    "IS_RESUME" = "true"
+  }
 }
 
 # Add comments v1
