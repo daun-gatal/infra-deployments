@@ -25,7 +25,7 @@ module "superset" {
   tailscale_funnel = true
   superset_port    = 80
 
-  bootstrap_pip_packages = ["trino"]
+  bootstrap_pip_packages = ["trino", "clickhouse-connect"]
 
   enable_superset_autoscaling = false
 

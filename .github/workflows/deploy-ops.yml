@@ -18,6 +18,7 @@ on:
         - keycloak
         - dockge
         - hms
+        - clickhouse
       action:
         description: 'Terraform Action'
         required: true
@@ -65,6 +66,7 @@ jobs:
       OPENBAO_CURRENT_KEY_ID: ${{ secrets.OPENBAO_CURRENT_KEY_ID }}
       OPENBAO_PREVIOUS_KEY: ${{ secrets.OPENBAO_PREVIOUS_KEY }}
       OPENBAO_PREVIOUS_KEY_ID: ${{ secrets.OPENBAO_PREVIOUS_KEY_ID }}
+      CH_ADMIN_PASSWORD: ${{ secrets.CH_ADMIN_PASSWORD }}
 
     steps:
     - uses: actions/checkout@v4
