@@ -12,14 +12,17 @@ module "server" {
 }
 
 module "ui" {
-  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/clickhouse/ui?ref=v0.6.0"
-
-  clickhouse_urls = module.server.config.internal_url
+  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/clickhouse/ui?ref=v0.7.0"
 
   tailscale_expose = false
   tailscale_funnel = true
   app_name         = "clickhouse-ui"
-  image_repository = "ghcr.io/daun-gatal/clickhouse-ui"
+
+  env_vars = {
+    CLICKHOUSE_DEFAULT_URL = module.server.config.internal_url
+    CLICKHOUSE_PRESET_URLS = module.server.config.internal_url
+    CORS_ORIGIN            = "https://clickhouse-ui-ext.kitty-barb.ts.net"
+  }
 
   depends_on = [module.server]
 }
