@@ -46,5 +46,21 @@
   {
     "name": "port-8081",
     "port": 8081
+  },
+  {
+    "name": "port-9300",
+    "port": 9300
+  },
+  {
+    "name": "port-9301",
+    "port": 9301
+  },
+  {
+    "name": "port-9302",
+    "port": 9302
+  },
+  {
+    "name": "port-9303",
+    "port": 9303
   }
 ]
