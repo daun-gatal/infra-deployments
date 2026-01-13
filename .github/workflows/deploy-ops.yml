@@ -91,7 +91,7 @@ jobs:
         
         if ! command -v tailscaled &> /dev/null; then
             echo "tailscaled not found, installing..."
-            curl -fsSL https://tailscale.com/install.sh | TAILSCALE_VERSION=1.92.4 sh
+            curl -fsSL https://tailscale.com/install.sh | TAILSCALE_VERSION=1.92.3 sh
         fi
         
         tailscaled \
