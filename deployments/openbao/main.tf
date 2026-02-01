@@ -1,24 +1,24 @@
-module "openbao" {
-  source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/openbao?ref=v0.2.4"
+# module "openbao" {
+#   source = "git::https://github.com/daun-gatal/terraform-modules.git//modules/openbao?ref=v0.2.4"
 
-  tailscale_ui_expose = true
-  generate_unseal_key = false
+#   tailscale_ui_expose = true
+#   generate_unseal_key = false
 
-  server_storage_secret_name = "openbao-storage-config"
-  server_unseal_secret_name  = "openbao-unseal-key"
+#   server_storage_secret_name = "openbao-storage-config"
+#   server_unseal_secret_name  = "openbao-unseal-key"
 
-  unseal_previous_key    = var.unseal_previous_key
-  unseal_previous_key_id = var.unseal_previous_key_id
-  unseal_current_key_id  = var.unseal_current_key_id
-  unseal_current_key     = var.unseal_current_key
+#   unseal_previous_key    = var.unseal_previous_key
+#   unseal_previous_key_id = var.unseal_previous_key_id
+#   unseal_current_key_id  = var.unseal_current_key_id
+#   unseal_current_key     = var.unseal_current_key
 
-  storage_type = "postgresql"
-  storage_postgresql = {
-    connection_url      = "postgres://${var.db_user}:${var.db_password}@${var.db_internal_dns}:5432/openbaodb?sslmode=disable"
-    ha_enabled          = true
-    max_connect_retries = 5
-    skip_create_table   = true
-  }
-}
+#   storage_type = "postgresql"
+#   storage_postgresql = {
+#     connection_url      = "postgres://${var.db_user}:${var.db_password}@${var.db_internal_dns}:5432/openbaodb?sslmode=disable"
+#     ha_enabled          = true
+#     max_connect_retries = 5
+#     skip_create_table   = true
+#   }
+# }
 
-# add comments v7
+# # add comments v7
